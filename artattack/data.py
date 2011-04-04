@@ -25,3 +25,8 @@ def load(filename, mode='rb'):
     "mode" is passed as the second arg to open().
     '''
     return open(os.path.join(data_dir, filename), mode)
+
+
+def load_sprite(fname):
+    import pygame.image
+    return pygame.image.load(filepath(fname, subdir='sprites')).convert_alpha()

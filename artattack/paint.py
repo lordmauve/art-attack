@@ -38,11 +38,14 @@ class PaintColour(object):
         self.index = index
         self.colour = colour
         self.swatch = make_coloured_surface(colour, self.colour_mask, overlay=self.colour_overlay)
+        self.paint_can = make_coloured_surface(colour, self.paint_can_mask, base=self.paint_can_base)
 
     @classmethod
     def load(cls):
-        cls.colour_mask = pygame.image.load(filepath('colour-mask.png', subdir='sprites')).convert_alpha()
-        cls.colour_overlay = pygame.image.load(filepath('colour-overlay.png', subdir='sprites')).convert_alpha()
+        cls.colour_mask = load_sprite('colour-mask.png')
+        cls.colour_overlay = load_sprite('colour-overlay.png')
+        cls.paint_can_mask = load_sprite('paint-can-mask.png')
+        cls.paint_can_base = load_sprite('paint-can-base.png')
 
     def draw_swatch(self, screen, pos):
         screen.blit(self.swatch, pos)
