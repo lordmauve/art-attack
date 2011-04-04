@@ -1,40 +1,68 @@
 """Classes representing each player in the game."""
 
+import time
+
 from pygame.color import Color
+
+from .data import load_sprite
 
 
 class PlayerPalette(object):
     """A player's collection of colours.
     
-    One of these colours is selected for drawing at a time.
+    One of these colours is selected for drawing at a time and this can be
+    cycled through the colours. Features an MRU system so the least used colour
+    is replaced on pickup, and players can use one key for toggling colours and
+    cycling through them all.
 
     """
     MAX_COLOURS = 6
 
     def __init__(self):
-        self.colours = [None] * self.MAX_COLOURS
+        self.colours = []
         self.selected = None
+        self.change_time = 0
 
     def get_selected(self):
         return self.colours[self.selected]
 
+    def next(self):
+        self.selected = (self.selected + 1) % len(self.colours)
+        self.change_time = 1
+
+    def update(self, dt):
+        if self.change_time > 0:
+            self.change_time -= dt
+            if self.change_time <= 0:
+                c = self.get_selected()
+                self.colours.remove(c)
+                self.colours.insert(0, c)
+                self.selected = 0
+
     def add_colour(self, colour):
-        for i, c in enumerate(self.colours):
-            if c is None:
-                self.colours[i] = colour
-                if self.selected is None:
-                    self.selected = i
-                return
-        else:
-            self.colours[self.selected] = colour
+        """If the palette doesn't contain it, add the colour to the palette.
+        
+        Also select the new colour.
+
+        """
+        if colour in self.colours:
+            return
+        self.colours = [colour] + self.colours[:self.MAX_COLOURS - 1]
+        self.selected = 0
 
     def draw(self, screen):
         xoff, yoff = self.DISPLAY_POS
-        for pos, c in zip(self.SWATCH_POSITIONS, self.colours): 
+        for i, pos, c in zip(range(self.MAX_COLOURS), self.SWATCH_POSITIONS, self.colours): 
             if c is None:
                 continue
             x, y = pos
             c.draw_swatch(screen, (x + xoff, y + yoff)) 
+            if i == self.selected:
+                screen.blit(self.selection_cursor, (x + xoff, y + yoff))
+
+    @classmethod
+    def load(cls):
+        cls.selection_cursor = load_sprite('colour-selected.png')
 
 
 class PlayerPaletteLeft(PlayerPalette):
@@ -42,8 +70,8 @@ class PlayerPaletteLeft(PlayerPalette):
     DISPLAY_POS = (8, 14)
 
 class PlayerPaletteRight(PlayerPalette):
-    SWATCH_POSITIONS = [(143 - x, y) for x, y in PlayerPaletteLeft.SWATCH_POSITIONS]
-    DISPLAY_POS = (852, 14)
+    SWATCH_POSITIONS = [(141 - x, y) for x, y in PlayerPaletteLeft.SWATCH_POSITIONS]
+    DISPLAY_POS = (850, 14)
 
 
 
@@ -85,6 +113,12 @@ class Player(object):
     def right(self):
         if self.tool:
             self.tool.move_right()
+
+    def next_colour(self):
+        self.palette.next()
+
+    def update(self, dt):
+        self.palette.update(dt)
 
     @classmethod
     def load(cls):

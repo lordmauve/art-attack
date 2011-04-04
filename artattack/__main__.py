@@ -29,6 +29,7 @@ def load():
 
     background = pygame.image.load(BACKGROUND).convert()
     PaintColour.load()
+    PlayerPalette.load()
 
     world = World.for_painting('desert-island2.png')
     world.give_colour()
@@ -50,6 +51,7 @@ KEYBINDINGS = {
         K_a: 'left',
         K_d: 'right',
         K_f: 'paint',
+        K_g: 'next_colour',
     },
     'blue': {
         K_UP: 'up',
@@ -57,6 +59,7 @@ KEYBINDINGS = {
         K_LEFT: 'left',
         K_RIGHT: 'right',
         K_INSERT: 'paint',
+        K_DELETE: 'next_colour',
     },
 }
 
@@ -66,7 +69,7 @@ def run():
 
     keeprunning = True
     while keeprunning:
-        clock.tick(30)
+        dt = clock.tick(30) / 1000.0
         for event in pygame.event.get():
             if event.type == QUIT:
                 return
@@ -75,6 +78,8 @@ def run():
                     return
                 if event.key == K_F12:
                     save_screenshot()
+                if event.key == K_F10:
+                    world.give_all_colours()
 
                 keybindings = [
                     (KEYBINDINGS['red'], world.red_player),
@@ -84,6 +89,9 @@ def run():
                 for (keyset, player) in keybindings:
                     if event.key in keyset:
                         getattr(player, keyset[event.key])()
+
+        for player in world.players:
+            player.update(dt)
 
         draw()
         pygame.display.flip()

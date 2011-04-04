@@ -97,6 +97,11 @@ class World(object):
         for player in self.players:
             player.palette.add_colour(random.choice(palette))
 
+    def give_all_colours(self):
+        palette = self.painting.get_palette()
+        for player in self.players:
+            player.palette.colours = palette[:]
+
     def draw(self, screen):
         self.painting.draw(screen)
         self.red_artwork.draw(screen)
