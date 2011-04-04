@@ -19,6 +19,12 @@ def filepath(filename, subdir=None):
         return os.path.join(data_dir, filename)
 
 
+def screenshot_path(filename):
+    '''Determine the path to a file in the data directory.
+    '''
+    return os.path.join(data_dir, '..', 'screenshots', filename)
+
+
 def load(filename, mode='rb'):
     '''Open a file in the data directory.
 

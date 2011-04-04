@@ -8,7 +8,7 @@ import datetime
 import pygame
 from pygame.locals import *
 
-from .data import filepath
+from .data import filepath, screenshot_path
 
 
 BACKGROUND = filepath('background.png', subdir='background')
@@ -40,7 +40,7 @@ def draw():
 
 
 def save_screenshot():
-    pygame.image.save(screen, datetime.datetime.now().strftime('screenshots/screenshot_%Y-%m-%d_%H:%M:%S.png'))
+    pygame.image.save(screen, screenshot_path(datetime.datetime.now().strftime('screenshot_%Y-%m-%d_%H:%M:%S.png')))
 
 
 KEYBINDINGS = {
@@ -60,17 +60,19 @@ KEYBINDINGS = {
     },
 }
 
-def main():
+def run():
     clock = pygame.time.Clock()
     pygame.key.set_repeat(100, 30)
 
     keeprunning = True
     while keeprunning:
-        clock.tick(60)
+        clock.tick(30)
         for event in pygame.event.get():
             if event.type == QUIT:
                 return
             elif event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    return
                 if event.key == K_F12:
                     save_screenshot()
 
@@ -87,6 +89,7 @@ def main():
         pygame.display.flip()
 
 
-load()
-main()
-
+def main():
+    load()
+    run()
+    pygame.quit()
