@@ -32,7 +32,7 @@ class Painting(object):
         return self.palette 
 
     def draw(self, screen):
-        screen.blit(self.surface, (390, 70))
+        screen.blit(self.surface, (390, 55))
 
 
 class Artwork(object):
