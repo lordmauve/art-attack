@@ -1,3 +1,3 @@
-import wasabi.__main__
+import artattack.__main__
 if __name__ == "__main__":
-    wasabi.__main__.main()
+    artattack.__main__.main()
