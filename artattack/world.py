@@ -70,16 +70,20 @@ class ArtworkPosition(object):
         return ArtworkPosition(world, artwork, w // 2, h // 2)
 
 
+ARTWORK_SIZE = (360, 240)
+
 
 class World(object):
     def __init__(self, painting):
         self.painting = painting
 
-        self.red_artwork = Artwork(painting, Rect(69, 305, 375, 248))
+        outlines = self.painting.build_outline_surface(*ARTWORK_SIZE)
+        self.red_artwork = Artwork(painting, Rect((79, 310), ARTWORK_SIZE), outlines=outlines)
         self.red_player = RedPlayer(self)
         self.red_player.set_tool(Brush(self, ArtworkPosition.artwork_centre(self, 0)))
 
-        self.blue_artwork = Artwork(painting, Rect(591, 305, 375, 248))
+        self.blue_artwork = Artwork(painting, Rect((602, 310), ARTWORK_SIZE), outlines=outlines)
+
         self.blue_player = BluePlayer(self)
         self.blue_player.set_tool(Brush(self, ArtworkPosition.artwork_centre(self, 1)))
         

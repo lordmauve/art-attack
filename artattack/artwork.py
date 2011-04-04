@@ -8,6 +8,8 @@ from .paint import PaintColour
 
 
 PAINTINGS_DIR = 'paintings'
+OUTLINE_COLOUR = pygame.color.Color('#00000033')
+BORDER_COLOUR = pygame.color.Color('#00000066')
 
 
 class Painting(object):
@@ -31,13 +33,40 @@ class Painting(object):
     def get_palette(self):
         return self.palette 
 
+    def build_outline_surface(self, sw, sh):
+        """Generate partially transparent guidelines to show where players should paint.
+        """
+        outlines = pygame.Surface((sw, sh), pygame.SRCALPHA)
+        outlines.fill((0, 0, 0, 0))
+        w, h = self.painting.get_size()
+        xstep = sw // w
+        ystep = sh // h
+
+        cy = 0
+        for j in range(h):
+            cx = 0
+            for i in range(w):
+                p = self.painting.get_at((i, j))
+                if i > 0:
+                    p2 = self.painting.get_at((i - 1, j))
+                    if p != p2:
+                        pygame.draw.line(outlines, OUTLINE_COLOUR, (cx, cy), (cx, cy + ystep))
+                if j > 0:
+                    p2 = self.painting.get_at((i, j - 1))
+                    if p != p2:
+                        pygame.draw.line(outlines, OUTLINE_COLOUR, (cx, cy), (cx + xstep, cy))
+                cx += xstep  
+            cy += ystep
+        pygame.draw.rect(outlines, BORDER_COLOUR, Rect((0, 0), (xstep * w, ystep * h)), 1)
+        return outlines
+
     def draw(self, screen):
         screen.blit(self.surface, (390, 55))
 
 
 class Artwork(object):
     """A player's copy of an original painting."""
-    def __init__(self, painting, rect):
+    def __init__(self, painting, rect, outlines=None):
         """Create an artwork to copy painting occupying screen position rect."""
 
         self.painting = painting
@@ -48,6 +77,7 @@ class Artwork(object):
         self.rect = rect
         self.xpix = rect.width // w
         self.ypix = rect.height // h
+        self.outlines = outlines
 
         self.blank()
 
@@ -78,6 +108,8 @@ class Artwork(object):
         
         self.surface = pygame.Surface((self.rect.width, self.rect.height))
         self.surface.fill((255, 255, 255))
+        if not self.outlines:
+            self.outlines = self.painting.build_outline_surface(self.rect.width, self.rect.height)
 
     def get_white(self):
         """Find or set a white colour in the artwork palette, for blanking the canvas."""
@@ -102,4 +134,5 @@ class Artwork(object):
 
     def draw(self, screen):
         screen.blit(self.surface, self.rect)
+        screen.blit(self.outlines, self.rect)
 
