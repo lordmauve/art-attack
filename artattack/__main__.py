@@ -10,10 +10,13 @@ from pygame.locals import *
 
 from .data import filepath
 
+from .paint import PaintColour
+
 
 PAINTINGS_DIR = 'paintings'
 BACKGROUND = filepath('background.png', subdir='background')
 
+del color
 
 class Painting(object):
     """An original painting as loaded from disk.
@@ -31,6 +34,9 @@ class Painting(object):
         fpath = filepath(self.filename, subdir=PAINTINGS_DIR)
         self.painting = pygame.image.load(fpath)
         self.surface = pygame.transform.scale(self.painting, (240, 160)).convert()
+
+    def get_palette(self):
+        return [PaintColour(i, c) for i, c in enumerate(self.painting.get_palette())]
 
     def draw(self, screen):
         screen.blit(self.surface, (390, 70))
@@ -109,6 +115,42 @@ class Artwork(object):
             self.tool.draw(screen)
 
 
+class PlayerPalette(object):
+    """A player's collection of colours.
+    
+    One of these colours is selected for drawing at a time.
+
+    """
+    LEFT_SWATCH_POSITIONS = [(52, 5), (82, 5), (111, 15), (121, 43), (97, 62), (67, 67)]
+    MAX_COLOURS = 6
+
+    def __init__(self):
+        self.colours = [None] * self.MAX_COLOURS
+        self.selected = None
+
+    def get_selected(self):
+        return self.colours[self.selected]
+
+    def add_colour(self, colour):
+        for i, c in enumerate(self.colours):
+            if c is None:
+                self.colours[i] = colour
+                if self.selected is None:
+                    self.selected = i
+                return
+        else:
+            self.colours[self.selected] = colour
+
+    def draw(self, screen):
+        for pos, c in zip(self.LEFT_SWATCH_POSITIONS, self.colours): 
+            if c is None:
+                continue
+            x, y = pos
+            x += 8
+            y += 55
+            c.draw_swatch(screen, (x, y)) 
+
+
 class Brush(object):
     """A 3x3 brush to paint onto an Artwork"""
     def __init__(self, artwork, pos=None):
@@ -147,20 +189,24 @@ class Brush(object):
 
 
 def load():
-    global screen, background, painting, red_artwork
+    global screen, background, painting, red_artwork, red_palette
     pygame.init()
     screen = pygame.display.set_mode((1024, 768))
 
     background = pygame.image.load(BACKGROUND).convert()
+    PaintColour.load()
 
     painting = Painting('desert-island2.png')
     red_artwork = Artwork(painting, Rect(69, 343, 375, 248))
+    red_palette = PlayerPalette()
+    red_palette.add_colour(painting.get_palette()[0])
 
 
 def draw():
     screen.blit(background, (0, 0))
     painting.draw(screen)
     red_artwork.draw(screen)
+    red_palette.draw(screen)
 
 
 def save_screenshot():
@@ -178,8 +224,8 @@ def main():
                 return
             elif event.type == MOUSEBUTTONDOWN:
                 if red_artwork.tool:
-                    pal = range(len(red_artwork.artwork.get_palette()))
-                    red_artwork.tool.paint(random.choice(pal))
+                    colour = red_palette.get_selected().index
+                    red_artwork.tool.paint(colour)
             elif event.type == KEYDOWN:
                 if event.key == K_F12:
                     save_screenshot()
