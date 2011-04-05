@@ -6,6 +6,11 @@ from .player import RedPlayer, BluePlayer
 from .artwork import *
 from .tools import Brush
 
+from .data import filepath
+
+
+BACKGROUND = filepath('background.png', subdir='background')
+
 
 class ArtworkPosition(object):
     """A pixel position within a pair of artworks.
@@ -71,18 +76,21 @@ class ArtworkPosition(object):
 
 
 ARTWORK_SIZE = (360, 240)
-
+RECT_RED = Rect((79, 310), ARTWORK_SIZE)
+RECT_BLUE = Rect((602, 310), ARTWORK_SIZE)
 
 class World(object):
     def __init__(self, painting):
         self.painting = painting
+        self.background = pygame.image.load(BACKGROUND).convert()
 
         outlines = self.painting.build_outline_surface(*ARTWORK_SIZE)
-        self.red_artwork = Artwork(painting, Rect((79, 310), ARTWORK_SIZE), outlines=outlines)
+
+        self.red_artwork = Artwork(painting, self.background.subsurface(RECT_RED), RECT_RED.copy(), outlines=outlines)
         self.red_player = RedPlayer(self)
         self.red_player.set_tool(Brush(self, ArtworkPosition.artwork_centre(self, 0)))
 
-        self.blue_artwork = Artwork(painting, Rect((602, 310), ARTWORK_SIZE), outlines=outlines)
+        self.blue_artwork = Artwork(painting, self.background.subsurface(RECT_BLUE), RECT_BLUE, outlines=outlines)
 
         self.blue_player = BluePlayer(self)
         self.blue_player.set_tool(Brush(self, ArtworkPosition.artwork_centre(self, 1)))
@@ -103,6 +111,7 @@ class World(object):
             player.palette.colours = palette[:]
 
     def draw(self, screen):
+        screen.blit(self.background, (0, 0))
         self.painting.draw(screen)
         self.red_artwork.draw(screen)
         self.blue_artwork.draw(screen)

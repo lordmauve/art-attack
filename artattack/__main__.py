@@ -10,9 +10,6 @@ from pygame.locals import *
 
 from .data import filepath, screenshot_path
 
-
-BACKGROUND = filepath('background.png', subdir='background')
-
 del color
 
 from .paint import PaintColour
@@ -26,8 +23,6 @@ def load():
     global screen, background, world
     pygame.init()
     screen = pygame.display.set_mode((1024, 600))
-
-    background = pygame.image.load(BACKGROUND).convert()
     PaintColour.load()
     PlayerPalette.load()
 
@@ -36,7 +31,6 @@ def load():
 
 
 def draw():
-    screen.blit(background, (0, 0))
     world.draw(screen)
 
 

@@ -66,11 +66,12 @@ class Painting(object):
 
 class Artwork(object):
     """A player's copy of an original painting."""
-    def __init__(self, painting, rect, outlines=None):
+    def __init__(self, painting, surface, rect, outlines=None):
         """Create an artwork to copy painting occupying screen position rect."""
 
         self.painting = painting
         self.artwork = self.painting.painting.copy()
+        self.surface = surface
 
         # Compute display dimensions of a pixel
         w, h = self.artwork.get_size()
@@ -106,7 +107,6 @@ class Artwork(object):
         self.white = self.get_white()
         self.artwork.fill(self.white)
         
-        self.surface = pygame.Surface((self.rect.width, self.rect.height))
         self.surface.fill((255, 255, 255))
         if not self.outlines:
             self.outlines = self.painting.build_outline_surface(self.rect.width, self.rect.height)
@@ -133,6 +133,5 @@ class Artwork(object):
         self.surface.fill(color, r)
 
     def draw(self, screen):
-        screen.blit(self.surface, self.rect)
         screen.blit(self.outlines, self.rect)
 
