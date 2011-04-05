@@ -67,6 +67,11 @@ class ArtworkPosition(object):
         a = self.world.artworks[self.artwork]
         return a.screen_rect_for_pixel(self.pos())
 
+    def floor_pos(self):
+        """Compute the floor-space position of the centre of the pixel."""
+        r = self.screen_rect()
+        return screen_to_floor(r.centerx, r.centery)
+
     @staticmethod
     def artwork_centre(world, artwork):
         w = world.painting.painting.get_width()
@@ -79,7 +84,32 @@ ARTWORK_SIZE = (360, 240)
 RECT_RED = Rect((79, 310), ARTWORK_SIZE)
 RECT_BLUE = Rect((602, 310), ARTWORK_SIZE)
 
+# The ratio of pixels in the x direction to pixels in the y direction in floor
+# space.  This value is derived from the perspective of some of the graphics
+# that have been drawn to exist in floor space.
+FORESHORTENING = 0.38 
+BACK_WALL = 262
+
+# Floor space <-> screen space conversions
+
+def screen_to_floor(x, y):
+    return x, (y - BACK_WALL) / FORESHORTENING
+
+def floor_to_screen(x, y):
+    return x, int(y * FORESHORTENING + BACK_WALL + 0.5)
+
+
 class World(object):
+    """The data model underlying what is drawn on the screen.
+    
+    The world contains some fixed instances of objects - eg. two players, two
+    artworks, as well as a collection of arbitrary objects that exist in "floor
+    space".
+    
+    Floor space matches pixels in the x direction and is
+    FORESHORTENING * pixels in the y direction, measured from the back wall.
+
+    """
     def __init__(self, painting):
         self.painting = painting
         self.background = pygame.image.load(BACKGROUND).convert()

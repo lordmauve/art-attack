@@ -76,6 +76,12 @@ class PlayerPaletteRight(PlayerPalette):
 
 
 class Player(object):
+    """A player of the game.
+
+    This class ties together the concepts of PlayerPalette, PlayerCharacter,
+    tools and so on as one identity.
+
+    """
     def __init__(self, world):
         self.palette = self.PALETTE_CLASS()
         self.world = world
@@ -126,10 +132,39 @@ class Player(object):
 
 
 class RedPlayer(Player):
+    """Subclass of Player to specify properties specific to the red player."""
+
     COLOUR = Color('#880000')
     PALETTE_CLASS = PlayerPaletteLeft
-
+        
 
 class BluePlayer(Player):
+    """Subclass of Player to specify properties specific to the blue player."""
+
     COLOUR = Color('#3333AA')
     PALETTE_CLASS = PlayerPaletteRight
+
+
+class PlayerCharacter(object):
+    """The player's avatar.
+
+    The PlayerCharacter is not directly controlled, but moves
+    automatically to keep in track with the player's brush cursor.
+    
+    (Eventually the game may swap from brush control to player control
+    automatically if the player holds down a key. This would allow more
+    responsive control of the character which will be important for PvP.)
+
+    """
+
+    def __init__(self, pos):
+        self.pos = pos # character position, in floor space
+        self.brush_pos = None # position of the brush, in floor space
+
+    def track_brush(self, pos):
+        """Update the position of the brush."""
+        self.brush_pos = pos
+
+    def update(self):
+        pass
+
