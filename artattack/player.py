@@ -106,9 +106,14 @@ class PlayerCharacter(Loadable):
 
     @classmethod
     def for_brush_pos(cls, brush_pos):
-        from .world import screen_to_floor
-        floor_pos = brush_pos.floor_pos() - screen_to_floor(*cls.brush_offsets[cls.DEFAULT_SPRITE]) + screen_to_floor(*cls.sprite_offsets[cls.DEFAULT_SPRITE])
-        return cls(floor_pos)
+        """Create an instance of a PlayerCharacter based on the position of the corresponding tool.""" 
+        from .world import screen_to_floor, FORESHORTENING
+        bx, by = cls.brush_offsets[cls.DEFAULT_SPRITE]
+        off = Vector([bx, by * FORESHORTENING])
+        floor_pos = brush_pos.floor_pos() - off
+        inst = cls(floor_pos)
+        inst.track_brush(brush_pos.floor_pos())
+        return inst
 
 
 class RedPlayerCharacter(PlayerCharacter):
