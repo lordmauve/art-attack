@@ -24,7 +24,8 @@ def load():
     pygame.init()
     screen = pygame.display.set_mode((1024, 600))
     PaintColour.load()
-    PlayerPalette.load()
+    RedPlayer.load()
+    BluePlayer.load()
 
     world = World.for_painting('desert-island2.png')
     world.give_colour()

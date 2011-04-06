@@ -1,13 +1,23 @@
-"""Represent the state of the world in 2D space and the artworks encapsulated within."""
+"""Represent the state of the world in 2D space and the artworks encapsulated within.
+
+There are three spaces in the game:
+
+ - Screen space. Coordinates are an integer tuple
+ - Floor space. Coordinates are a real vector
+ - Arwork space. Coordinates are an ArtworkPosition
+
+There are various mappings between these spaces.
+
+"""
 
 import random
 
 from .player import RedPlayer, BluePlayer
 from .artwork import *
-from .tools import Brush
 
 from .data import filepath
 
+from vector import Vector
 
 BACKGROUND = filepath('background.png', subdir='background')
 
@@ -85,18 +95,23 @@ RECT_RED = Rect((79, 310), ARTWORK_SIZE)
 RECT_BLUE = Rect((602, 310), ARTWORK_SIZE)
 
 # The ratio of pixels in the x direction to pixels in the y direction in floor
-# space.  This value is derived from the perspective of some of the graphics
-# that have been drawn to exist in floor space.
-FORESHORTENING = 0.38 
+# space. The value derived from the perspective of some of the graphics that
+# have been drawn to exist in floor space is about 0.38, but we haven't
+# foreshortened the artworks that much so that they appear more face-on to
+# players. This value is thus a compromise.
+FORESHORTENING = 0.7
+
+# Y-position of bottom of the back wall in screen space
 BACK_WALL = 262
 
 # Floor space <-> screen space conversions
+# These are bijective (except that screen space coordinates are rounded to integers)
 
 def screen_to_floor(x, y):
-    return x, (y - BACK_WALL) / FORESHORTENING
+    return Vector((x, (y - BACK_WALL) / FORESHORTENING))
 
-def floor_to_screen(x, y):
-    return x, int(y * FORESHORTENING + BACK_WALL + 0.5)
+def floor_to_screen(v):
+    return v.x, int(v.y * FORESHORTENING + BACK_WALL + 0.5)
 
 
 class World(object):
@@ -117,16 +132,17 @@ class World(object):
         outlines = self.painting.build_outline_surface(*ARTWORK_SIZE)
 
         self.red_artwork = Artwork(painting, self.background.subsurface(RECT_RED), RECT_RED.copy(), outlines=outlines)
-        self.red_player = RedPlayer(self)
-        self.red_player.set_tool(Brush(self, ArtworkPosition.artwork_centre(self, 0)))
-
         self.blue_artwork = Artwork(painting, self.background.subsurface(RECT_BLUE), RECT_BLUE, outlines=outlines)
 
-        self.blue_player = BluePlayer(self)
-        self.blue_player.set_tool(Brush(self, ArtworkPosition.artwork_centre(self, 1)))
-        
         # For convenience
         self.artworks = (self.red_artwork, self.blue_artwork)
+
+        red_start = ArtworkPosition.artwork_centre(self, 0)
+        blue_start = ArtworkPosition.artwork_centre(self, 1)
+        self.red_player = RedPlayer(self, red_start)
+        self.blue_player = BluePlayer(self, blue_start)
+
+        # Also for convenience
         self.players = (self.red_player, self.blue_player)
 
     def give_colour(self):

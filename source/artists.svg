@@ -28,11 +28,11 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1"
-     inkscape:cx="259.9914"
-     inkscape:cy="822.87471"
+     inkscape:zoom="0.70710678"
+     inkscape:cx="661.53827"
+     inkscape:cy="1284.1193"
      inkscape:document-units="px"
-     inkscape:current-layer="layer3"
+     inkscape:current-layer="running"
      showgrid="false"
      inkscape:window-width="1680"
      inkscape:window-height="1023"
@@ -57,8 +57,7 @@
      inkscape:groupmode="layer"
      id="layer2"
      inkscape:label="Animation Guides"
-     style="display:inline"
-     sodipodi:insensitive="true">
+     style="display:inline;opacity:0">
     <g
        style="display:inline"
        id="running"
@@ -71,7 +70,10 @@
          x="0"
          y="0"
          xlink:href="#g3585"
-         id="use3639" />
+         id="use3639"
+         inkscape:export-filename="/home/mauve/dev/pyweek-wasabi/data/sprites/blue-artist-run-1.png"
+         inkscape:export-xdpi="90"
+         inkscape:export-ydpi="90" />
       <use
          height="1"
          width="1"
@@ -79,7 +81,10 @@
          x="0"
          y="0"
          xlink:href="#g3585"
-         id="use3641" />
+         id="use3641"
+         inkscape:export-filename="/home/mauve/dev/pyweek-wasabi/data/sprites/blue-artist-run-2.png"
+         inkscape:export-xdpi="90"
+         inkscape:export-ydpi="90" />
       <use
          height="1"
          width="1"
@@ -87,7 +92,10 @@
          x="0"
          y="0"
          xlink:href="#g3585"
-         id="use3643" />
+         id="use3643"
+         inkscape:export-filename="/home/mauve/dev/pyweek-wasabi/data/sprites/blue-artist-run-3.png"
+         inkscape:export-xdpi="90"
+         inkscape:export-ydpi="90" />
       <use
          x="0"
          y="0"
@@ -95,7 +103,10 @@
          id="use3645"
          transform="translate(947,-364)"
          width="744.09448"
-         height="1052.3622" />
+         height="1052.3622"
+         inkscape:export-filename="/home/mauve/dev/pyweek-wasabi/data/sprites/blue-artist-run-4.png"
+         inkscape:export-xdpi="90"
+         inkscape:export-ydpi="90" />
       <use
          x="0"
          y="0"
@@ -103,7 +114,10 @@
          id="use3647"
          transform="translate(1137,-364)"
          width="744.09448"
-         height="1052.3622" />
+         height="1052.3622"
+         inkscape:export-filename="/home/mauve/dev/pyweek-wasabi/data/sprites/red-artist-run-5.png"
+         inkscape:export-xdpi="90"
+         inkscape:export-ydpi="90" />
       <use
          height="1052.3622"
          width="744.09448"
@@ -111,7 +125,10 @@
          id="use3637"
          xlink:href="#g3585"
          y="0"
-         x="0" />
+         x="0"
+         inkscape:export-filename="/home/mauve/dev/pyweek-wasabi/data/sprites/blue-artist-run-6.png"
+         inkscape:export-xdpi="90"
+         inkscape:export-ydpi="90" />
       <use
          x="0"
          y="0"
@@ -119,7 +136,10 @@
          id="use3649"
          transform="translate(1517,-364)"
          width="744.09448"
-         height="1052.3622" />
+         height="1052.3622"
+         inkscape:export-filename="/home/mauve/dev/pyweek-wasabi/data/sprites/blue-artist-run-7.png"
+         inkscape:export-xdpi="90"
+         inkscape:export-ydpi="90" />
     </g>
     <g
        style="display:inline"
