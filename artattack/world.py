@@ -162,8 +162,8 @@ class World(object):
         self.red_artwork.draw(screen)
         self.blue_artwork.draw(screen)
 
-        self.red_player.draw(screen)
-        self.blue_player.draw(screen)
+        for player in sorted(self.players, key=lambda p: p.pc.pos.y):
+            player.draw(screen)
 
     @staticmethod
     def for_painting(filename):
