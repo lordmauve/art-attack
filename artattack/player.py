@@ -3,6 +3,7 @@
 import time
 
 from pygame.color import Color
+from vector import Vector
 
 from .tools import Brush
 from .animation import Loadable
@@ -20,18 +21,24 @@ class PlayerCharacter(Loadable):
 
     """
 
-    DEFAULT_SPRITE = 'painting-right'
+    DEFAULT_SPRITE = 'standing-right'
 
     sprite_offsets = {
         'painting-left': (50, 160),
         'painting-right': (60, 126),
         'painting-centre': (31, 150),
+        'standing-right': (68, 116),
+        'standing-left': (50, 165),
+        'standing-centre': (59, 157),
     }
 
     brush_offsets = {
-        'painting-left': (13, 172),
-        'painting-right': (107, 138),
-        'painting-centre': (318, 168),
+        'painting-left': (-37, 12),
+        'painting-right': (47, 12),
+        'painting-centre': (0, 14),
+        'standing-left': (-37, 12),
+        'standing-right': (47, 12),
+        'standing-centre': (0, 14),
     }
 
     MAX_SPEED = 500
@@ -40,20 +47,56 @@ class PlayerCharacter(Loadable):
         self.pos = pos # character position, in floor space
         self.brush_pos = None  # The position the character should try to get to
         self.sprite = self.DEFAULT_SPRITE
+        self.painting = 0
+        self.dir = 'right'
 
     def track_brush(self, pos):
         """Update the position of the brush (in floor space)."""
         self.brush_pos = pos
 
     def update(self, dt):
-        from .world import screen_to_floor
+        from .world import screen_to_floor, FORESHORTENING
         if self.brush_pos is None:
             return
-        t = self.brush_pos - screen_to_floor(*self.brush_offsets[self.sprite]) + screen_to_floor(*self.sprite_offsets[self.sprite])
+    
+        bx, by = self.brush_offsets[self.sprite]
+        t = self.brush_pos - Vector([bx, by * FORESHORTENING])
+
         v = (t - self.pos)
-        if v.length > self.MAX_SPEED * dt:
-            v = v.scaled_to(self.MAX_SPEED * dt)
-        self.pos += v
+        # orient character
+        if self.dir == 'centre':
+            if v.x <= -20:
+                self.dir = 'left'
+            elif v.x >= 30:
+                self.dir = 'right'
+        elif self.dir == 'right':
+            if v.x < -30:
+                self.dir = 'centre'
+        elif self.dir == 'left':
+            if v.x > 20:
+                self.dir = 'centre'
+
+        if -37 <= v.x <= 47:
+            self.pos += Vector([0, max(-self.MAX_SPEED * dt, min(self.MAX_SPEED * dt, v.y))])
+            if abs(v.y) > 1:
+                self.painting = 0
+        else:
+            if v.length > self.MAX_SPEED * dt:
+                v = v.scaled_to(self.MAX_SPEED * dt)
+
+            self.pos += v
+            self.painting = 0
+
+        if self.painting > 0:
+            self.painting -= dt
+
+        if self.painting > 0:
+            self.sprite = 'painting-%s' % self.dir
+        else:
+            self.sprite = 'standing-%s' % self.dir
+
+    def paint(self):
+        self.painting = 0.1
 
     def draw(self, screen):
         from .world import floor_to_screen
@@ -73,6 +116,9 @@ class RedPlayerCharacter(PlayerCharacter):
         'painting-left': 'red-artist-painting-left.png',
         'painting-centre': 'red-artist-painting-centre.png',
         'painting-right': 'red-artist-painting-right.png',
+        'standing-left': 'red-artist-standing-left.png',
+        'standing-centre': 'red-artist-standing-centre.png',
+        'standing-right': 'red-artist-standing-right.png',
     }
 
 
@@ -81,6 +127,9 @@ class BluePlayerCharacter(PlayerCharacter):
         'painting-left': 'blue-artist-painting-left.png',
         'painting-centre': 'blue-artist-painting-centre.png',
         'painting-right': 'blue-artist-painting-right.png',
+        'standing-left': 'blue-artist-standing-left.png',
+        'standing-centre': 'blue-artist-standing-centre.png',
+        'standing-right': 'blue-artist-standing-right.png',
     }
 
 
@@ -184,6 +233,7 @@ class Player(object):
         if self.tool:
             colour = self.palette.get_selected().index
             self.tool.paint(colour)
+            self.pc.paint()
 
     def up(self):
         if self.tool:
