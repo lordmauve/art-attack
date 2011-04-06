@@ -77,14 +77,14 @@ class PlayerCharacter(Loadable):
                 self.dir = 'centre'
 
         if -37 <= v.x <= 47:
-            self.pos += Vector([0, max(-self.MAX_SPEED * dt, min(self.MAX_SPEED * dt, v.y))])
+            self.pos += self.reduce_v_for_collision(Vector([0, max(-self.MAX_SPEED * dt, min(self.MAX_SPEED * dt, v.y))]))
             if abs(v.y) > 1:
                 self.painting = 0
         else:
             if v.length > self.MAX_SPEED * dt:
                 v = v.scaled_to(self.MAX_SPEED * dt)
 
-            self.pos += v
+            self.pos += self.reduce_v_for_collision(v)
             self.painting = 0
 
         if self.painting > 0:
@@ -103,6 +103,13 @@ class PlayerCharacter(Loadable):
         x, y = floor_to_screen(self.pos)
         xoff, yoff = self.sprite_offsets[self.sprite]
         screen.blit(self.sprites[self.sprite], (x - xoff, y - yoff))
+
+    def reduce_v_for_collision(self, v):
+        if (self.pos + v).distance_to(self.other_player.pos) > 20:
+            return v
+        else:
+            return Vector((0, 0))
+
 
     @classmethod
     def for_brush_pos(cls, brush_pos):
@@ -205,7 +212,6 @@ class PlayerPaletteRight(PlayerPalette):
     DISPLAY_POS = (850, 14)
 
 
-
 class Player(object):
     """A player of the game.
 
@@ -221,6 +227,9 @@ class Player(object):
 
         self.tool = None
         self.set_tool(Brush(self, start_pos))
+
+    def set_other_player(self, other_player):
+        self.pc.other_player = other_player.pc
 
     def set_tool(self, tool):
         if self.tool:
