@@ -16,10 +16,34 @@ from .player import RedPlayer, BluePlayer
 from .artwork import *
 
 from .data import filepath
+from .animation import Loadable
 
 from vector import Vector
 
 BACKGROUND = filepath('background.png', subdir='background')
+
+LEFT_ARTWORK = 0
+RIGHT_ARTWORK = 1
+
+
+class Actor(Loadable):
+    DEFAULT_SPRITE = 'undefined'
+
+    def __init__(self, pos):
+        self.pos = pos
+        self.sprite = self.DEFAULT_SPRITE
+
+    def get_sprite(self):
+        return self.sprites[self.sprite]
+
+    def update(self, dt):
+        sprite = self.get_sprite()
+        if hasattr(self.sprite, 'update'):
+            self.sprite.update(dt)
+
+    def draw(self, screen):
+        self.get_sprite().draw(screen, floor_to_screen(self.pos))
+        
 
 
 class ArtworkPosition(object):
@@ -126,6 +150,7 @@ class World(object):
 
     """
     def __init__(self, painting):
+        from .powerups import PowerupFactory
         self.painting = painting
         self.background = pygame.image.load(BACKGROUND).convert()
 
@@ -137,8 +162,8 @@ class World(object):
         # For convenience
         self.artworks = (self.red_artwork, self.blue_artwork)
 
-        red_start = ArtworkPosition.artwork_centre(self, 0)
-        blue_start = ArtworkPosition.artwork_centre(self, 1)
+        red_start = ArtworkPosition.artwork_centre(self, LEFT_ARTWORK)
+        blue_start = ArtworkPosition.artwork_centre(self, RIGHT_ARTWORK)
         self.red_player = RedPlayer(self, self.red_artwork, red_start)
         self.blue_player = BluePlayer(self, self.blue_artwork, blue_start)
         self.red_player.set_other_player(self.blue_player)
@@ -147,16 +172,46 @@ class World(object):
         # Also for convenience
         self.players = (self.red_player, self.blue_player)
 
+        self.actors = [self.red_player.pc, self.blue_player.pc]
+
+        self.powerup_factory = PowerupFactory(self)
+
+    def spawn(self, actor):
+        actor.world = self
+        self.actors.append(actor)
+
+    def kill(self, actor):
+        self.actors.remove(actor)
+
+    def get_floor_space(self):
+        """Compute the top left and bottom right floor positions of the space"""
+        tl = ArtworkPosition(self, LEFT_ARTWORK, 0, 0).floor_pos()
+        br = ArtworkPosition(self, RIGHT_ARTWORK, self.blue_artwork.width - 1, self.blue_artwork.height - 1).floor_pos()
+        return tl, br
+
     def give_colour(self):
         """Give each player a random colour."""
-        palette = self.painting.get_palette()
         for player in self.players:
-            player.palette.add_colour(random.choice(palette))
+            player.palette.add_colour(self.get_random_colour())
+
+    def get_random_colour(self):
+        palette = self.painting.get_palette()
+        return random.choice(palette)
 
     def give_all_colours(self):
         palette = self.painting.get_palette()
         for player in self.players:
             player.palette.colours = palette[:]
+
+    def drop_powerups(self):
+        for side in range(2):
+            self.powerup_factory.drop(side)
+
+    def update(self, dt):
+        for a in self.actors:
+            a.update(dt)
+
+        #self.powerup_factory.update(dt)
 
     def draw(self, screen):
         screen.blit(self.background, (0, 0))
@@ -164,8 +219,11 @@ class World(object):
         self.red_artwork.draw(screen)
         self.blue_artwork.draw(screen)
 
-        for player in sorted(self.players, key=lambda p: p.pc.pos.y):
-            player.draw(screen)
+        for p in self.players:
+            p.draw(screen)
+        self.actors.sort(key=lambda a: a.pos.y)
+        for a in self.actors:
+            a.draw(screen)
 
     @staticmethod
     def for_painting(filename):

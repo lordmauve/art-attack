@@ -31,6 +31,8 @@ class GameState(object):
     def on_key(self, event):
         if event.key == K_F10:
             self.world.give_all_colours()
+        if event.key == K_F9:
+            self.world.drop_powerups()
 
         keybindings = get_keybindings()
         ks = [
@@ -43,8 +45,7 @@ class GameState(object):
                 getattr(player, keyset[event.key])()
 
     def update(self, dt):
-        for player in self.world.players:
-            player.update(dt)
+        self.world.update(dt)
 
     def draw(self, screen):
         self.world.draw(screen)

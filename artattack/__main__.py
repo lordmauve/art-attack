@@ -46,8 +46,8 @@ class Game(object):
                 elif event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
                         return
-                    elif event.key == K_F10:
-                        save_screenshot()
+                    elif event.key == K_F12:
+                        save_screenshot(self.screen)
                     self.gamestate.on_key(event)
 
             self.gamestate.update(dt)
@@ -55,9 +55,8 @@ class Game(object):
 
             pygame.display.flip()
 
-
-def save_screenshot():
-    pygame.image.save(screen, screenshot_path(datetime.datetime.now().strftime('screenshot_%Y-%m-%d_%H:%M:%S.png')))
+    def save_screenshot(self):
+        pygame.image.save(self.screen, screenshot_path(datetime.datetime.now().strftime('screenshot_%Y-%m-%d_%H:%M:%S.png')))
 
 
 def main(painting=DEFAULT_PAINTING):

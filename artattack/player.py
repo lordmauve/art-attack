@@ -251,8 +251,6 @@ class Player(object):
         if self.tool:
             self.tool.draw(screen, self.COLOUR)
 
-        self.pc.draw(screen)
-
         complete, total = self.artwork.completeness()
         percent = u'%0.1f%% complete' % (complete * 100.0 / total)
         pixels = '%d correct / %d total' % (complete, total)

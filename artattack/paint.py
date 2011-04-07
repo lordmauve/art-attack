@@ -2,6 +2,8 @@ import pygame
 from pygame.locals import *
 
 from .data import *
+from .animation import Sprite
+
 
 del color
 
@@ -38,7 +40,7 @@ class PaintColour(object):
         self.index = index
         self.colour = colour
         self.swatch = make_coloured_surface(colour, self.colour_mask, overlay=self.colour_overlay)
-        self.paint_can = make_coloured_surface(colour, self.paint_can_mask, base=self.paint_can_base)
+        self.paint_can = Sprite(make_coloured_surface(colour, self.paint_can_mask, base=self.paint_can_base), (-16, -34))
 
     @classmethod
     def load(cls):
