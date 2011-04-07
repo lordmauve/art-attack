@@ -175,10 +175,18 @@ class PlayerPalette(Loadable):
         if self.change_time > 0:
             self.change_time -= dt
             if self.change_time <= 0:
-                c = self.get_selected()
-                self.colours.remove(c)
-                self.colours.insert(0, c)
-                self.selected = 0
+                self.switch()
+
+    def switch(self):
+        """Switch the order of the palette so that the currently selected colour is first.
+        """
+        if not self.selected:
+            return
+
+        c = self.get_selected()
+        self.colours.remove(c)
+        self.colours.insert(0, c)
+        self.selected = 0
 
     def add_colour(self, colour):
         """If the palette doesn't contain it, add the colour to the palette.
@@ -248,6 +256,7 @@ class Player(object):
             colour = self.palette.get_selected().index
             self.tool.paint(colour)
             self.pc.paint()
+            self.palette.switch()
 
     def up(self):
         if self.tool:
