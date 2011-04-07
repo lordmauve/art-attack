@@ -2,9 +2,9 @@ from pygame import transform
 from .data import load_sprite, load_anim_def
 
 
-def sprite(name):
+def sprite(name, off=(0, 0)):
     def load():
-        return load_sprite(name + '.png')
+        return Sprite(load_sprite(name + '.png'), off)
 
     return load
 
@@ -39,6 +39,26 @@ class Loadable(object):
             sprites[k] = load()
 
         cls.sprites = sprites
+
+
+class Sprite(object):
+    """A surface plus an offset."""
+
+    def __init__(self, surface, off=(0, 0)):
+        self.surface = surface
+        self.off = off
+
+    def get_size(self):
+        return self.surface.get_size()
+
+    def get_instance(self):
+        return self
+
+    def draw(self, screen, pos):
+        x, y = pos
+        xoff, yoff = self.off
+        screen.blit(self.surface, (x + xoff, y + yoff))
+
 
 
 class AnimationInstance(object):

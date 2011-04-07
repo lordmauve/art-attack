@@ -101,7 +101,7 @@ class PlayerCharacter(Loadable):
         from .world import floor_to_screen
         x, y = floor_to_screen(self.pos)
         xoff, yoff = self.sprite_offsets[self.sprite]
-        screen.blit(self.sprites[self.sprite], (x - xoff, y - yoff))
+        self.sprites[self.sprite].draw(screen, (x - xoff, y - yoff))
 
     def reduce_v_for_collision(self, v):
         if (self.pos + v).distance_to(self.other_player.pos) > 20:
@@ -208,7 +208,7 @@ class PlayerPalette(Loadable):
             x, y = pos
             c.draw_swatch(screen, (x + xoff, y + yoff)) 
             if i == self.selected:
-                screen.blit(self.sprites['selection_cursor'], (x + xoff, y + yoff))
+                self.sprites['selection_cursor'].draw(screen, (x + xoff, y + yoff))
 
 
 class PlayerPaletteLeft(PlayerPalette):

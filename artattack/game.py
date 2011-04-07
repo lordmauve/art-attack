@@ -88,6 +88,6 @@ class StartGameState(Loadable):
         x1 = w // 4 - sw // 2
         x2 = x1 + w // 2
         y = h // 2 - sh // 2
-        screen.blit(s, (x1, y))
-        screen.blit(s, (x2, y))
+        s.draw(screen, (x1, y))
+        s.draw(screen, (x2, y))
 
