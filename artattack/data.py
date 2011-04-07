@@ -3,7 +3,9 @@
 Loads data files from the "data" directory shipped with a game.
 '''
 
+import sys
 import os
+import re
 
 
 data_py = os.path.abspath(os.path.dirname(__file__))
@@ -31,6 +33,69 @@ def load(filename, mode='rb'):
     "mode" is passed as the second arg to open().
     '''
     return open(os.path.join(data_dir, filename), mode)
+
+
+anim_comment_re = re.compile(r'#.*$')
+anim_line_re = re.compile(r'^(?P<key>base|frames|offsets):\s*(?P<value>.*)$')
+
+def load_anim_def(filename):
+    '''Open an animation definition file and parse the contents.
+    '''
+    f = open(os.path.join(data_dir, 'anims', filename), 'r')
+
+    layers = []
+    base = None
+    frames = None
+    offsets = []
+    for line, l in enumerate(f):
+        line += 1
+        l = anim_comment_re.sub('', l).rstrip()
+        if not l:
+            continue
+
+        mo = anim_line_re.match(l)
+        if not mo:
+            print >>sys.stderr, "Warning: failed to parse animation (%s, line %d)" % (filename, line)
+            continue
+
+        key = mo.group('key')
+        value = mo.group('value')
+
+        if key == 'base':
+            if base:
+                if not frames:
+                    print >>sys.stderr, "Warning: animation layer %s missing frames (%s, line %d)" % (base, filename, line)
+                elif not offsets:
+                    print >>sys.stderr, "Warning: animation layer %s missing offsets (%s, line %d)" % (base, filename, line)
+                else: 
+                    layers.append((base, frames, offsets))
+
+            base = value
+            frames = None
+            offsets = []
+        elif key == 'frames':
+            frames = int(value)
+        elif key == 'offsets':
+            coords = value.split(' ')
+            offsets = []
+            for c in coords:
+                if c == '-':
+                    offsets.append(None)
+                else:
+                    x, y = c.split(',')
+                    offsets.append((int(x), int(y)))
+    if base:
+        if not frames:
+            print >>sys.stderr, "Warning: animation layer %s missing frames (%s, line %d)" % (base, filename, line)
+        elif not offsets:
+            print >>sys.stderr, "Warning: animation layer %s missing offsets (%s, line %d)" % (base, filename, line)
+        else: 
+            layers.append((base, frames, offsets))
+
+    return layers
+
+
+
 
 
 def load_sprite(fname):
