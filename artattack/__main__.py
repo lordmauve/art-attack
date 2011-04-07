@@ -18,8 +18,10 @@ from .player import *
 from .tools import *
 from .world import World
 
+DEFAULT_PAINTING = 'desert-island2.png'
 
-def load():
+
+def load(painting=DEFAULT_PAINTING):
     global screen, background, world
     pygame.init()
     screen = pygame.display.set_mode((1024, 600))
@@ -27,7 +29,7 @@ def load():
     RedPlayer.load()
     BluePlayer.load()
 
-    world = World.for_painting('desert-island2.png')
+    world = World.for_painting(painting)
     world.give_colour()
 
 
@@ -92,7 +94,7 @@ def run():
         pygame.display.flip()
 
 
-def main():
-    load()
+def main(painting=DEFAULT_PAINTING):
+    load(painting)
     run()
     pygame.quit()
