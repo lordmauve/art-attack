@@ -139,8 +139,8 @@ class World(object):
 
         red_start = ArtworkPosition.artwork_centre(self, 0)
         blue_start = ArtworkPosition.artwork_centre(self, 1)
-        self.red_player = RedPlayer(self, red_start)
-        self.blue_player = BluePlayer(self, blue_start)
+        self.red_player = RedPlayer(self, self.red_artwork, red_start)
+        self.blue_player = BluePlayer(self, self.blue_artwork, blue_start)
         self.red_player.set_other_player(self.blue_player)
         self.blue_player.set_other_player(self.red_player)
 

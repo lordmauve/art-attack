@@ -80,6 +80,9 @@ class Artwork(object):
         self.ypix = rect.height // h
         self.outlines = outlines
 
+        self.correct = None
+        self.num_pixels = w * h
+
         self.blank()
 
     @property
@@ -89,6 +92,20 @@ class Artwork(object):
     @property
     def height(self):
         return self.artwork.get_height()
+
+    def compute_completeness(self):
+        w, h = self.artwork.get_size()
+        correct = 0
+        for j in xrange(h):
+            for i in xrange(w):
+                orig = self.painting.painting.get_at((i, j))
+                art = self.artwork.get_at((i, j))
+                if orig == art:
+                    correct += 1
+        return correct
+
+    def completeness(self):
+        return self.correct, self.num_pixels
 
     def screen_rect_for_pixel(self, pixel):
         """Return the screen rectangle covered by pixel"""
@@ -110,6 +127,7 @@ class Artwork(object):
         self.surface.fill((255, 255, 255))
         if not self.outlines:
             self.outlines = self.painting.build_outline_surface(self.rect.width, self.rect.height)
+        self.correct = self.compute_completeness()
 
     def get_white(self):
         """Find or set a white colour in the artwork palette, for blanking the canvas."""
@@ -122,15 +140,22 @@ class Artwork(object):
             self.artwork.set_palette(pal)
             return len(pal) - 1
 
-    def paint_pixel(self, pixel, color):
+    def paint_pixel(self, pixel, colour):
         """Paint a pixel a given colour, where pixel = (x, y)"""
-        self.artwork.set_at(pixel, color)
+        colour = self.artwork.get_palette_at(colour)
+        old_colour = self.artwork.get_at(pixel)
+        if old_colour != colour:
+            orig = self.painting.painting.get_at(pixel)
+            if orig == colour:
+                self.correct += 1
+            elif orig == old_colour:
+                self.correct -= 1
+        self.artwork.set_at(pixel, colour)
         x, y = pixel
 
         r = Rect(self.xpix * x, self.ypix * y, self.xpix, self.ypix)
-        color = self.artwork.get_palette_at(color)
 
-        self.surface.fill(color, r)
+        self.surface.fill(colour, r)
 
     def draw(self, screen):
         screen.blit(self.outlines, self.rect)

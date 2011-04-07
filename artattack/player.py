@@ -2,6 +2,7 @@
 
 import time
 
+import pygame
 from pygame.color import Color
 from vector import Vector
 
@@ -227,9 +228,10 @@ class Player(object):
     tools and so on as one identity.
 
     """
-    def __init__(self, world, start_pos):
+    def __init__(self, world, artwork, start_pos):
         self.palette = self.PALETTE_CLASS()
         self.world = world
+        self.artwork = artwork
 
         self.pc = self.CHARACTER.for_brush_pos(start_pos)
 
@@ -250,6 +252,15 @@ class Player(object):
             self.tool.draw(screen, self.COLOUR)
 
         self.pc.draw(screen)
+
+        complete, total = self.artwork.completeness()
+        percent = '%0.1f%% complete' % (complete * 100.0 / total)
+        pixels = '%d correct / %d total' % (complete, total)
+        surf = self.score_font.render(percent, True, Color('white'))
+        screen.blit(surf, self.SCORE_COORDS)
+        surf = self.score_font.render(pixels, True, Color('white'))
+        sx, sy = self.SCORE_COORDS
+        screen.blit(surf, (sx, sy + 24))
 
     def paint(self):
         if self.tool:
@@ -287,6 +298,8 @@ class Player(object):
 
     @classmethod
     def load(cls):
+        if not hasattr(Player, 'font'):
+            Player.score_font = pygame.font.Font(pygame.font.get_default_font(), 18)
         cls.CHARACTER.load()
         cls.PALETTE_CLASS.load()
 
@@ -297,6 +310,8 @@ class RedPlayer(Player):
     COLOUR = Color('#880000')
     PALETTE_CLASS = PlayerPaletteLeft
     CHARACTER = RedPlayerCharacter
+
+    SCORE_COORDS = (15, 135)
         
 
 class BluePlayer(Player):
@@ -305,3 +320,5 @@ class BluePlayer(Player):
     COLOUR = Color('#3333AA')
     PALETTE_CLASS = PlayerPaletteRight
     CHARACTER = BluePlayerCharacter
+
+    SCORE_COORDS = (800, 135)
