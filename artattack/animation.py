@@ -29,6 +29,9 @@ class Loadable(object):
 
     @classmethod
     def load(cls):
+        if hasattr(cls, 'sprites'):
+            return
+
         sprites = {}
         # TODO: load base classes' sprites and pre-populate the sprites dict
 

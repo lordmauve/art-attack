@@ -8,93 +8,61 @@ import datetime
 import pygame
 from pygame.locals import *
 
-from .data import filepath, screenshot_path
 
-del color
+from .game import GameState, StartGameState
 
-from .paint import PaintColour
-from .artwork import *
-from .player import *
-from .tools import *
-from .world import World
 
 DEFAULT_PAINTING = 'desert-island2.png'
 
 
-def load(painting=DEFAULT_PAINTING):
-    global screen, background, world
-    pygame.init()
-    screen = pygame.display.set_mode((1024, 600))
-    PaintColour.load()
-    RedPlayer.load()
-    BluePlayer.load()
+class Game(object):
+    """Wraps the Pygame initialisation/event loop system.
+    
+    All behaviour is delegated to a Gamestate
+    """
 
-    world = World.for_painting(painting)
-    world.give_colour()
+    def __init__(self):
+        pygame.init()
+        self.screen = pygame.display.set_mode((1024, 600))
+        self.gamestate = None
 
+    def start_game(self, gamestate):
+        self.set_gamestate(StartGameState(gamestate))
 
-def draw():
-    world.draw(screen)
+    def set_gamestate(self, gamestate):
+        gamestate.game = self
+        self.gamestate = gamestate
+
+    def run(self):
+        clock = pygame.time.Clock()
+        pygame.key.set_repeat(100, 30)
+
+        keeprunning = True
+        while keeprunning:
+            dt = clock.tick(30) / 1000.0
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    return
+                elif event.type == KEYDOWN:
+                    if event.key == K_ESCAPE:
+                        return
+                    elif event.key == K_F10:
+                        save_screenshot()
+                    self.gamestate.on_key(event)
+
+            self.gamestate.update(dt)
+            self.gamestate.draw(self.screen)
+
+            pygame.display.flip()
 
 
 def save_screenshot():
     pygame.image.save(screen, screenshot_path(datetime.datetime.now().strftime('screenshot_%Y-%m-%d_%H:%M:%S.png')))
 
 
-KEYBINDINGS = {
-    'red': {
-        K_w: 'up',
-        K_s: 'down',
-        K_a: 'left',
-        K_d: 'right',
-        K_f: 'paint',
-        K_g: 'next_colour',
-    },
-    'blue': {
-        K_UP: 'up',
-        K_DOWN: 'down',
-        K_LEFT: 'left',
-        K_RIGHT: 'right',
-        K_INSERT: 'paint',
-        K_DELETE: 'next_colour',
-    },
-}
-
-def run():
-    clock = pygame.time.Clock()
-    pygame.key.set_repeat(100, 30)
-
-    keeprunning = True
-    while keeprunning:
-        dt = clock.tick(30) / 1000.0
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                return
-            elif event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
-                    return
-                if event.key == K_F12:
-                    save_screenshot()
-                if event.key == K_F10:
-                    world.give_all_colours()
-
-                keybindings = [
-                    (KEYBINDINGS['red'], world.red_player),
-                    (KEYBINDINGS['blue'], world.blue_player),
-                ]
-
-                for (keyset, player) in keybindings:
-                    if event.key in keyset:
-                        getattr(player, keyset[event.key])()
-
-        for player in world.players:
-            player.update(dt)
-
-        draw()
-        pygame.display.flip()
-
-
 def main(painting=DEFAULT_PAINTING):
-    load(painting)
-    run()
+    game = Game()
+    game.start_game(GameState(painting))
+    game.run()
+    pygame.quit()
     pygame.quit()

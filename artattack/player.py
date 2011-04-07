@@ -254,7 +254,7 @@ class Player(object):
         self.pc.draw(screen)
 
         complete, total = self.artwork.completeness()
-        percent = '%0.1f%% complete' % (complete * 100.0 / total)
+        percent = u'%0.1f%% complete' % (complete * 100.0 / total)
         pixels = '%d correct / %d total' % (complete, total)
         surf = self.score_font.render(percent, True, Color('white'))
         screen.blit(surf, self.SCORE_COORDS)

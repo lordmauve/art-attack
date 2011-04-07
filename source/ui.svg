@@ -94,6 +94,82 @@
        id="radialGradient3648"
        xlink:href="#linearGradient6396-8-9"
        inkscape:collect="always" />
+    <linearGradient
+       y2="64.887558"
+       x2="133.64319"
+       y1="55.164845"
+       x1="123.03658"
+       gradientTransform="translate(-1.562502,-0.37499638)"
+       gradientUnits="userSpaceOnUse"
+       id="linearGradient8327"
+       xlink:href="#linearGradient7478-6"
+       inkscape:collect="always" />
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient7478-6">
+      <stop
+         style="stop-color:#ffffff;stop-opacity:1;"
+         offset="0"
+         id="stop7480-8" />
+      <stop
+         style="stop-color:#ffffff;stop-opacity:0;"
+         offset="1"
+         id="stop7482-92" />
+    </linearGradient>
+    <linearGradient
+       y2="60.46814"
+       x2="119.50105"
+       y1="55.871952"
+       x1="107.12668"
+       gradientTransform="matrix(0.96219479,0,0,0.96219479,-18.935188,11.572215)"
+       gradientUnits="userSpaceOnUse"
+       id="linearGradient8361"
+       xlink:href="#linearGradient7478-1-6"
+       inkscape:collect="always" />
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient7478-1-6">
+      <stop
+         style="stop-color:#ffffff;stop-opacity:1;"
+         offset="0"
+         id="stop7480-4-4" />
+      <stop
+         style="stop-color:#ffffff;stop-opacity:0;"
+         offset="1"
+         id="stop7482-9-9" />
+    </linearGradient>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath3884">
+      <path
+         sodipodi:nodetypes="cssssssssc"
+         inkscape:connector-curvature="0"
+         id="path3886"
+         d="m 48.181368,51.102319 c 4.525746,0.326649 9.722425,3.352473 14.379364,4.830961 8.970708,2.848026 6.331265,5.176551 9.932208,5.464715 4.717844,0.377542 10.927989,-2.791709 12.002873,-4.025234 1.074884,-1.233525 -1.433178,-5.91585 -2.866358,-6.45973 -1.433178,-0.54388 -8.778221,-4.848349 -13.973495,-5.849976 -2.752131,-0.5306 -7.003295,-2.424605 -8.979858,-2.366615 -3.338411,0.09794 -4.209026,1.495277 -5.219982,1.813359 -2.149768,0.676393 -3.855488,-0.201491 -6.170489,3.840182 -1.055953,1.843549 0.895737,2.752338 0.895737,2.752338 z"
+         style="color:#000000;fill:#c87137;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath6496">
+      <path
+         sodipodi:nodetypes="cssssssssc"
+         inkscape:connector-curvature="0"
+         id="path6498"
+         d="m 48.181368,51.102319 c 4.525746,0.326649 9.722425,3.352473 14.379364,4.830961 8.970708,2.848026 6.331265,5.176551 9.932208,5.464715 4.717844,0.377542 10.927989,-2.791709 12.002873,-4.025234 1.074884,-1.233525 -1.433178,-5.91585 -2.866358,-6.45973 -1.433178,-0.54388 -8.778221,-4.848349 -13.973495,-5.849976 -2.752131,-0.5306 -7.003295,-2.424605 -8.979858,-2.366615 -3.338411,0.09794 -4.209026,1.495277 -5.219982,1.813359 -2.149768,0.676393 -3.855488,-0.201491 -6.170489,3.840182 -1.055953,1.843549 0.895737,2.752338 0.895737,2.752338 z"
+         style="color:#000000;fill:#c87137;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+    </clipPath>
+    <font
+       horiz-adv-x="1024"
+       id="font24237"
+       inkscape:label="font 1">
+      <font-face
+         units-per-em="1024"
+         id="font-face24239"
+         font-family="SVGFont 1" />
+      <missing-glyph
+         d="M0,0h1000v1024h-1000z"
+         id="missing-glyph24241" />
+    </font>
   </defs>
   <sodipodi:namedview
      id="base"
@@ -103,15 +179,15 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1"
-     inkscape:cx="519.73019"
-     inkscape:cy="1182.1359"
+     inkscape:cx="159.18214"
+     inkscape:cy="1100.6521"
      inkscape:document-units="px"
-     inkscape:current-layer="g5118"
+     inkscape:current-layer="g3594"
      showgrid="false"
-     inkscape:window-width="1680"
-     inkscape:window-height="1023"
-     inkscape:window-x="1280"
-     inkscape:window-y="0"
+     inkscape:window-width="1280"
+     inkscape:window-height="723"
+     inkscape:window-x="0"
+     inkscape:window-y="25"
      inkscape:window-maximized="1"
      showguides="true"
      inkscape:guide-bbox="true" />
@@ -273,7 +349,10 @@
          transform="matrix(0.57095822,0.58740558,-0.58740558,0.57095822,115.20932,10.224013)" />
     </g>
     <g
-       id="g3594">
+       id="g3594"
+       inkscape:export-filename="/home/mauve/dev/pyweek-wasabi/data/sprites/game-paint.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
       <use
          height="1052.3622"
          width="744.09448"
@@ -286,12 +365,12 @@
          transform="scale(0.99694348,1.0030659)"
          id="text3562"
          y="157.40723"
-         x="609.76648"
-         style="font-size:86.98260498000000496px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-indent:0;text-align:center;text-decoration:none;line-height:normal;letter-spacing:1.14677453000000007;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:middle;color:#000000;fill:#2c89a0;fill-opacity:1;fill-rule:evenodd;stroke:#00222b;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Balcony Angels;-inkscape-font-specification:Balcony Angels Bold"
+         x="611.87769"
+         style="font-size:86.98260498px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-indent:0;text-align:center;text-decoration:none;line-height:normal;letter-spacing:1.14677453;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:middle;color:#000000;fill:#2c89a0;fill-opacity:1;fill-rule:evenodd;stroke:#00222b;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Balcony Angels;-inkscape-font-specification:Balcony Angels Bold"
          xml:space="preserve"><tspan
-           style="text-align:center;text-anchor:middle;stroke-width:2;stroke:#00222b"
+           style="text-align:center;text-anchor:middle;stroke:#00222b;stroke-width:2"
            y="157.40723"
-           x="610.33984"
+           x="612.45105"
            id="tspan3564"
            sodipodi:role="line">PAINT!</tspan></text>
       <use
@@ -324,7 +403,10 @@
     </g>
     <g
        id="g3602"
-       transform="translate(-254,0)">
+       transform="translate(-254,0)"
+       inkscape:export-filename="/home/mauve/dev/pyweek-wasabi/data/sprites/game-steady.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
       <use
          x="0"
          y="0"
@@ -335,16 +417,16 @@
          height="1052.3622" />
       <text
          xml:space="preserve"
-         style="font-size:86.98260498000000496px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-indent:0;text-align:center;text-decoration:none;line-height:normal;letter-spacing:1.14677453000000007;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:middle;color:#000000;fill:#2c89a0;fill-opacity:1;fill-rule:evenodd;stroke:#00222b;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Balcony Angels;-inkscape-font-specification:Balcony Angels Bold"
-         x="609.76648"
+         style="font-size:86.98260498px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-indent:0;text-align:center;text-decoration:none;line-height:normal;letter-spacing:1.14677453;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:middle;color:#000000;fill:#2c89a0;fill-opacity:1;fill-rule:evenodd;stroke:#00222b;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Balcony Angels;-inkscape-font-specification:Balcony Angels Bold"
+         x="612.34521"
          y="157.40723"
          id="text3606"
          transform="scale(0.99694348,1.0030659)"><tspan
            sodipodi:role="line"
            id="tspan3608"
-           x="610.33984"
+           x="612.91858"
            y="157.40723"
-           style="text-align:center;text-anchor:middle;stroke-width:2;stroke:#00222b">STEADY</tspan></text>
+           style="text-align:center;text-anchor:middle;stroke:#00222b;stroke-width:2">STEADY</tspan></text>
       <use
          x="0"
          y="0"
@@ -366,7 +448,10 @@
     </g>
     <g
        transform="translate(-493,0)"
-       id="g3616">
+       id="g3616"
+       inkscape:export-filename="/home/mauve/dev/pyweek-wasabi/data/sprites/game-ready.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
       <use
          height="1052.3622"
          width="744.09448"
@@ -379,12 +464,12 @@
          transform="scale(0.99694348,1.0030659)"
          id="text3620"
          y="157.40723"
-         x="609.76648"
-         style="font-size:86.98260498000000496px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-indent:0;text-align:center;text-decoration:none;line-height:normal;letter-spacing:1.14677453000000007;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:middle;color:#000000;fill:#2c89a0;fill-opacity:1;fill-rule:evenodd;stroke:#00222b;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Balcony Angels;-inkscape-font-specification:Balcony Angels Bold"
+         x="611.64935"
+         style="font-size:86.98260498px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-indent:0;text-align:center;text-decoration:none;line-height:normal;letter-spacing:1.14677453;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:middle;color:#000000;fill:#2c89a0;fill-opacity:1;fill-rule:evenodd;stroke:#00222b;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Balcony Angels;-inkscape-font-specification:Balcony Angels Bold"
          xml:space="preserve"><tspan
-           style="text-align:center;text-anchor:middle;stroke-width:2;stroke:#00222b"
+           style="text-align:center;text-anchor:middle;stroke:#00222b;stroke-width:2"
            y="157.40723"
-           x="610.33984"
+           x="612.22272"
            id="tspan3622"
            sodipodi:role="line">READY</tspan></text>
       <use
@@ -834,7 +919,10 @@
        width="744.09448"
        height="1052.3622" />
     <g
-       id="g5118">
+       id="g5118"
+       inkscape:export-filename="/home/mauve/dev/pyweek-wasabi/data/sprites/gameover-winner.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
       <g
          transform="translate(637,-309)"
          id="g4970">
@@ -979,7 +1067,10 @@
            style="text-align:center;text-anchor:middle;stroke:#00222b;stroke-width:2">WINNER</tspan></text>
     </g>
     <g
-       id="g5140">
+       id="g5140"
+       inkscape:export-filename="/home/mauve/dev/pyweek-wasabi/data/sprites/gameover-loser.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
       <g
          id="g5027"
          transform="matrix(0.99561032,-0.09359537,0.09359537,0.99561032,1041.0588,-345.22717)">
