@@ -6,7 +6,7 @@ from pygame.color import Color
 from vector import Vector
 
 from .tools import Brush
-from .animation import Loadable
+from .animation import Loadable, sprite, anim, mirror_anim
 
 
 class PlayerCharacter(Loadable):
@@ -22,6 +22,7 @@ class PlayerCharacter(Loadable):
     """
 
     DEFAULT_SPRITE = 'standing-right'
+    DEFAULT_DIR = 'right'
 
     sprite_offsets = {
         'painting-left': (50, 160),
@@ -33,12 +34,9 @@ class PlayerCharacter(Loadable):
     }
 
     brush_offsets = {
-        'painting-left': (-37, 12),
-        'painting-right': (47, 12),
-        'painting-centre': (0, 14),
-        'standing-left': (-37, 12),
-        'standing-right': (47, 12),
-        'standing-centre': (0, 14),
+        'left': (-37, 12),
+        'right': (47, 12),
+        'centre': (0, 14),
     }
 
     MAX_SPEED = 500
@@ -59,7 +57,7 @@ class PlayerCharacter(Loadable):
         if self.brush_pos is None:
             return
     
-        bx, by = self.brush_offsets[self.sprite]
+        bx, by = self.brush_offsets[self.dir]
         t = self.brush_pos - Vector([bx, by * FORESHORTENING])
 
         v = (t - self.pos)
@@ -108,7 +106,7 @@ class PlayerCharacter(Loadable):
     def for_brush_pos(cls, brush_pos):
         """Create an instance of a PlayerCharacter based on the position of the corresponding tool.""" 
         from .world import screen_to_floor, FORESHORTENING
-        bx, by = cls.brush_offsets[cls.DEFAULT_SPRITE]
+        bx, by = cls.brush_offsets[cls.DEFAULT_DIR]
         off = Vector([bx, by * FORESHORTENING])
         floor_pos = brush_pos.floor_pos() - off
         inst = cls(floor_pos)
@@ -118,23 +116,25 @@ class PlayerCharacter(Loadable):
 
 class RedPlayerCharacter(PlayerCharacter):
     SPRITES = {
-        'painting-left': 'red-artist-painting-left.png',
-        'painting-centre': 'red-artist-painting-centre.png',
-        'painting-right': 'red-artist-painting-right.png',
-        'standing-left': 'red-artist-standing-left.png',
-        'standing-centre': 'red-artist-standing-centre.png',
-        'standing-right': 'red-artist-standing-right.png',
+        'painting-left': sprite('red-artist-painting-left'),
+        'painting-centre': sprite('red-artist-painting-centre'),
+        'painting-right': sprite('red-artist-painting-right'),
+        'standing-left': sprite('red-artist-standing-left'),
+        'standing-centre': sprite('red-artist-standing-centre'),
+        'standing-right': sprite('red-artist-standing-right'),
+        'run-right': anim('red-artist-run'),
+        'run-left': mirror_anim('red-artist-run'),
     }
 
 
 class BluePlayerCharacter(PlayerCharacter):
     SPRITES = {
-        'painting-left': 'blue-artist-painting-left.png',
-        'painting-centre': 'blue-artist-painting-centre.png',
-        'painting-right': 'blue-artist-painting-right.png',
-        'standing-left': 'blue-artist-standing-left.png',
-        'standing-centre': 'blue-artist-standing-centre.png',
-        'standing-right': 'blue-artist-standing-right.png',
+        'painting-left': sprite('blue-artist-painting-left'),
+        'painting-centre': sprite('blue-artist-painting-centre'),
+        'painting-right': sprite('blue-artist-painting-right'),
+        'standing-left': sprite('blue-artist-standing-left'),
+        'standing-centre': sprite('blue-artist-standing-centre'),
+        'standing-right': sprite('blue-artist-standing-right'),
     }
 
 
@@ -149,7 +149,7 @@ class PlayerPalette(Loadable):
     """
     MAX_COLOURS = 6
     SPRITES = {
-        'selection_cursor': 'colour-selected.png'
+        'selection_cursor': sprite('colour-selected'),
     }
 
     def __init__(self):
