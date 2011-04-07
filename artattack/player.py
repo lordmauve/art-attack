@@ -62,6 +62,7 @@ class PlayerCharacter(Loadable):
         t = self.brush_pos - Vector([bx, by * FORESHORTENING])
 
         v = (t - self.pos)
+        
         # orient character
         if self.dir == 'centre':
             if v.x <= -20:
@@ -76,14 +77,15 @@ class PlayerCharacter(Loadable):
                 self.dir = 'centre'
 
         if -37 <= v.x <= 47:
-            self.pos += self.reduce_v_for_collision(Vector([0, max(-self.MAX_SPEED * dt, min(self.MAX_SPEED * dt, v.y))]))
+            v = self.alter_v_for_collision(Vector([0, max(-self.MAX_SPEED * dt, min(self.MAX_SPEED * dt, v.y))]))
+            self.pos += v
             if abs(v.y) > 1:
                 self.painting = 0
         else:
             if v.length > self.MAX_SPEED * dt:
                 v = v.scaled_to(self.MAX_SPEED * dt)
-
-            self.pos += self.reduce_v_for_collision(v)
+            v = self.alter_v_for_collision(v)
+            self.pos += v
             self.painting = 0
 
         if self.painting > 0:
@@ -103,11 +105,11 @@ class PlayerCharacter(Loadable):
         xoff, yoff = self.sprite_offsets[self.sprite]
         self.sprites[self.sprite].draw(screen, (x - xoff, y - yoff))
 
-    def reduce_v_for_collision(self, v):
+    def alter_v_for_collision(self, v):
         if (self.pos + v).distance_to(self.other_player.pos) > 20:
             return v
         else:
-            return Vector((0, 0))
+            return v.rotated(v.angle_to(self.pos - self.other_player.pos) - 90)
 
 
     @classmethod
