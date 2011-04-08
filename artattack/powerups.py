@@ -46,7 +46,7 @@ class PowerupFactory(object):
     DROP_SD = 5 # standard deviation in drop times
 
     MIN_DELAY = 5
-    INITIAL_DELAY = 10 # give players something after 10s just to help them get started
+    INITIAL_DELAY = 6 # give players something after 6s just to help them get started
 
     POWERUPS = []
 
@@ -57,6 +57,7 @@ class PowerupFactory(object):
     def __init__(self, world):
         self.world = world
         self.t = 0
+        # FIXME: for balance, initial drop should be paint and should be a different colour to the one they already have
         self.nextdrop = [self.INITIAL_DELAY, self.INITIAL_DELAY]
 
     def schedule_drop(self, side):
@@ -64,9 +65,9 @@ class PowerupFactory(object):
         self.nextdrop[side] = self.t + delay
 
     def drop(self, side):
-        # FIXME: drop onto the correct side
         tl, br = self.world.get_floor_space()
-        x = tl.x + random.random() * (br.x - tl.x)
+        w2 = (br.x - tl.x) / 2
+        x = tl.x + random.random() * (w2) + side * w2
         y = tl.y + random.random() * (br.y - tl.y)
         powerup_class = random.choice(self.POWERUPS)
 
