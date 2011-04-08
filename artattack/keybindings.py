@@ -8,6 +8,7 @@ KEYBINDINGS = {
         K_d: 'right',
         K_f: 'paint',
         K_g: 'next_colour',
+        K_r: 'attack',
     },
     'blue': {
         K_UP: 'up',
@@ -16,6 +17,7 @@ KEYBINDINGS = {
         K_RIGHT: 'right',
         K_INSERT: 'paint',
         K_DELETE: 'next_colour',
+        K_END: 'attack',
     },
 }
 

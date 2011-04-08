@@ -31,15 +31,6 @@ class PlayerCharacter(Actor):
     COLLISION_MASK = COLLISION_GROUP_PLAYER | COLLISION_GROUP_POWERUP
     RADIUS = 30
 
-    sprite_offsets = {
-        'painting-left': (50, 160),
-        'painting-right': (60, 126),
-        'painting-centre': (31, 150),
-        'standing-right': (68, 116),
-        'standing-left': (50, 165),
-        'standing-centre': (59, 157),
-    }
-
     brush_offsets = {
         'left': (-37, 12),
         'right': (47, 12),
@@ -48,6 +39,9 @@ class PlayerCharacter(Actor):
 
     MAX_SPEED = 500
 
+    ATTACK_DURATION = 0.4 #seconds, how long an attack lasts
+    ATTACK_INTERVAL = 0.3 #seconds, how long between attacks
+
     def __init__(self, pos, player):
         super(PlayerCharacter, self).__init__(pos)
         self.player = player
@@ -55,6 +49,7 @@ class PlayerCharacter(Actor):
         self.sprite = self.DEFAULT_SPRITE
         self.painting = 0
         self.dir = 'right'
+        self.attacking = 0
 
     def track_brush(self, pos):
         """Update the position of the brush (in floor space)."""
@@ -64,6 +59,9 @@ class PlayerCharacter(Actor):
         from .world import screen_to_floor, FORESHORTENING
         if self.brush_pos is None:
             return
+
+        if self.attacking > 0:
+            self.attacking -= dt
     
         bx, by = self.brush_offsets[self.dir]
         t = self.brush_pos - Vector([bx, by * FORESHORTENING])
@@ -98,19 +96,42 @@ class PlayerCharacter(Actor):
         if self.painting > 0:
             self.painting -= dt
 
-        if self.painting > 0:
+        if self.attacking > self.ATTACK_INTERVAL:
+            self.sprite = 'standing-attack'
+        elif self.painting > 0:
             self.sprite = 'painting-%s' % self.dir
         else:
             self.sprite = 'standing-%s' % self.dir
 
+    def get_hit_region(self):
+        tl = self.pos + Vector([0, -40])
+        br = self.pos + Vector([0, 40])
+        if self.ATTACK_VECTOR.x < 0:
+            tl += self.ATTACK_VECTOR
+        else:
+            br += self.ATTACK_VECTOR
+        return tl, br
+
+    def attack(self):
+        if self.attacking > 0:
+            return
+        self.attacking = self.ATTACK_INTERVAL + self.ATTACK_DURATION
+        region = self.get_hit_region()
+        for a in self.world.actors_in_region(*region):
+            if a is self:
+                continue
+            if isinstance(a, PlayerCharacter):
+                a.on_hit(self.ATTACK_VECTOR)
+
+    def on_hit(self, attack_vector):
+        self.pos += attack_vector
+        if self.player.tool:
+            x, y = attack_vector
+            self.player.tool.pos += (x // 30, 0)
+            self.track_brush(self.player.tool.pos.floor_pos())
+
     def paint(self):
         self.painting = 0.1
-
-    def draw(self, screen):
-        from .world import floor_to_screen
-        x, y = floor_to_screen(self.pos)
-        xoff, yoff = self.sprite_offsets[self.sprite]
-        self.sprites[self.sprite].draw(screen, (x - xoff, y - yoff))
 
     def alter_v_for_collision(self, v):
         if (self.pos + v).distance_to(self.other_player.pos) > 20:
@@ -140,26 +161,32 @@ class PlayerCharacter(Actor):
 
 class RedPlayerCharacter(PlayerCharacter):
     SPRITES = {
-        'painting-left': sprite('red-artist-painting-left'),
-        'painting-centre': sprite('red-artist-painting-centre'),
-        'painting-right': sprite('red-artist-painting-right'),
-        'standing-left': sprite('red-artist-standing-left'),
-        'standing-centre': sprite('red-artist-standing-centre'),
-        'standing-right': sprite('red-artist-standing-right'),
+        'painting-left': sprite('red-artist-painting-left', (-50, -160)),
+        'painting-centre': sprite('red-artist-painting-centre', (-31, -150)),
+        'painting-right': sprite('red-artist-painting-right', (-60, -126)),
+        'standing-left': sprite('red-artist-standing-left', (-50, -165)),
+        'standing-centre': sprite('red-artist-standing-centre', (-59, -157)),
+        'standing-right': sprite('red-artist-standing-right', (-68, -116)),
+        'standing-attack': sprite('red-artist-standing-attack', (-27, -100)),
         'run-right': anim('red-artist-run'),
         'run-left': mirror_anim('red-artist-run'),
     }
 
+    ATTACK_VECTOR = Vector([150, 0])
+
 
 class BluePlayerCharacter(PlayerCharacter):
     SPRITES = {
-        'painting-left': sprite('blue-artist-painting-left'),
-        'painting-centre': sprite('blue-artist-painting-centre'),
-        'painting-right': sprite('blue-artist-painting-right'),
-        'standing-left': sprite('blue-artist-standing-left'),
-        'standing-centre': sprite('blue-artist-standing-centre'),
-        'standing-right': sprite('blue-artist-standing-right'),
+        'painting-left': sprite('blue-artist-painting-left', (-50, -160)),
+        'painting-centre': sprite('blue-artist-painting-centre', (-31, -150)),
+        'painting-right': sprite('blue-artist-painting-right', (-60, -126)),
+        'standing-left': sprite('blue-artist-standing-left', (-50, -165)),
+        'standing-centre': sprite('blue-artist-standing-centre', (-59, -157)),
+        'standing-right': sprite('blue-artist-standing-right', (-68, -116)),
+        'standing-attack': sprite('blue-artist-standing-attack', (-154, -100)),
     }
+
+    ATTACK_VECTOR = Vector([-150, 0])
 
 
 class PlayerPalette(Loadable):
@@ -305,6 +332,9 @@ class Player(object):
         if self.tool:
             self.tool.move_right()
             self.pc.track_brush(self.tool.pos.floor_pos())
+
+    def attack(self):
+        self.pc.attack()
 
     def next_colour(self):
         self.palette.next()

@@ -259,6 +259,14 @@ class World(object):
                         #print a, "collides", b
                         a.handle_collision(b)
 
+    def actors_in_region(self, tl, br):
+        x1, y1 = tl
+        x2, y2 = br
+        for a in self.actors:
+            p = a.pos
+            if x1 <= p.x < x2 and y1 <= p.y < y2:
+                yield a
+
     def draw(self, screen):
         screen.blit(self.background, (0, 0))
         self.painting.draw(screen)
