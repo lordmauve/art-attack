@@ -24,14 +24,18 @@ NO_WINNER = -1
 
 
 class GameState(object):
-    def __init__(self, painting):
-        Label.load()
+    def __init__(self, painting, timelimit=120):
         PaintColour.load()
         RedPlayer.load()
         BluePlayer.load()
 
         self.world = World.for_painting(painting)
         self.world.give_colour()
+        
+        self.timelimit = timelimit
+        self.t = timelimit
+        if timelimit:
+            self.time_label = Label((512, 560), align=Label.ALIGN_CENTRE, size=24)
 
     def get_winner(self):
         red = self.world.red_player.artwork.completeness()[0]
@@ -66,10 +70,18 @@ class GameState(object):
                 getattr(player, keyset[event.key])()
 
     def update(self, dt):
+        if self.timelimit:
+            self.t -= dt
+            if self.t <= 0:
+                self.t = 0
+                self.end_game()
         self.world.update(dt)
 
     def draw(self, screen):
         self.world.draw(screen)
+        if self.timelimit:
+            text = '%d:%04.1f' % (int(self.t / 60), self.t % 60)
+            self.time_label.draw(screen, text)
 
 
 class BannerGameState(Loadable):

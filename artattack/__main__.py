@@ -63,9 +63,9 @@ class Game(object):
         pygame.image.save(self.screen, screenshot_path(datetime.datetime.now().strftime('screenshot_%Y-%m-%d_%H:%M:%S.png')))
 
 
-def main(painting=DEFAULT_PAINTING):
+def main(painting=DEFAULT_PAINTING, timelimit=120):
     game = Game()
-    game.start_game(GameState(painting))
+    game.start_game(GameState(painting, timelimit=timelimit))
     game.run()
     pygame.quit()
     pygame.quit()
