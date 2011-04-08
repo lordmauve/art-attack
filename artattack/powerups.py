@@ -68,6 +68,8 @@ class PowerupFactory(object):
 
     def drop(self, side):
         tl, br = self.world.get_floor_space()
+        tl += Vector([30, 15]) 
+        br -= Vector([45, 15]) 
         w2 = (br.x - tl.x) / 2
         x = tl.x + random.random() * (w2) + side * w2
         y = tl.y + random.random() * (br.y - tl.y)

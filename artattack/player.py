@@ -29,7 +29,7 @@ class PlayerCharacter(Actor):
 
     COLLISION_GROUP = COLLISION_GROUP_PLAYER
     COLLISION_MASK = COLLISION_GROUP_PLAYER | COLLISION_GROUP_POWERUP
-    RADIUS = 20
+    RADIUS = 30
 
     sprite_offsets = {
         'painting-left': (50, 160),
