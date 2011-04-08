@@ -51,7 +51,7 @@ class Game(object):
                     if event.key == K_ESCAPE:
                         return
                     elif event.key == K_F12:
-                        save_screenshot(self.screen)
+                        self.save_screenshot(self.screen)
                     self.gamestate.on_key(event)
 
             self.gamestate.update(dt)
