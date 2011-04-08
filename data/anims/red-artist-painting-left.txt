@@ -1,0 +1,9 @@
+base: red-artist-painting-left
+frames: 1
+offsets: -50,-160
+
+base: paint-left
+colour: true
+frames: 1
+offsets: -50,-1
+

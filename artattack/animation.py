@@ -1,4 +1,6 @@
 from pygame import transform
+from pygame.locals import *
+
 from .data import load_sprite, load_anim_def
 
 
@@ -11,7 +13,7 @@ def sprite(name, off=(0, 0)):
 
 def anim(name):
     def load():
-        return Animation.from_file(name + '.txt')
+        return LayeredAnimation.from_file(name + '.txt')
 
     return load
 
@@ -19,7 +21,7 @@ def anim(name):
 def mirror_anim(name):
     # Not the most efficient way of doing it.
     def load():
-        return Animation.from_file(name + '.txt').mirror()
+        return LayeredAnimation.from_file(name + '.txt').mirror()
 
     return load
 
@@ -51,7 +53,7 @@ class Sprite(object):
     def get_size(self):
         return self.surface.get_size()
 
-    def get_instance(self):
+    def create_instance(self, colour=None):
         return self
 
     def draw(self, screen, pos):
@@ -63,12 +65,13 @@ class Sprite(object):
 
 class AnimationInstance(object):
     """An instance of an animation."""
-    def __init__(self, anim):
+    def __init__(self, anim, colour=None):
         self.anim = anim
         self.playing = False
         self.frame = 0
         self.frametime = 0
         self.finished = False
+        self.colour = colour
 
         self.on_finish_handlers = []
 
@@ -89,6 +92,8 @@ class AnimationInstance(object):
         self.frame = frame % len(self.anim.frames)
         
     def get_frame(self):
+        if self.colour:
+            return self.anim.colourised_frames[self.colour][self.frame]
         return self.anim.frames[self.frame]
 
     def update(self, dt):
@@ -128,6 +133,7 @@ class Animation(object):
 
     def __init__(self, frames, framerate=12, looping=True):
         self.frames = frames
+        self.colourised_frames = {}
         self.frametime = 1.0 / float(framerate)
         self.looping = looping
 
@@ -141,10 +147,21 @@ class Animation(object):
             flipped_frames.append((flipped, (offx, offy)))
         return Animation(flipped_frames, 1.0 / self.frametime, self.looping)
 
-    def create_instance(self, started=True):
-        inst = self.INSTANCE_CLASS(self)
+    def colourise(self, colour):
+        fs = []
+        for surface, offset in self.frames:
+            col = surface.copy()
+            col.fill(colour.colour, None, BLEND_RGB_MULT)
+            fs.append((col, offset))
+        self.colourised_frames[colour] = fs
+
+    def create_instance(self, colour=None, started=True):
+        if colour is not None:
+            self.colourise(colour)
+        inst = self.INSTANCE_CLASS(self, colour=colour)
         if started:
             inst.play()
+        return inst
 
     @classmethod
     def from_file(cls, filename):
@@ -153,10 +170,10 @@ class Animation(object):
         return cls.load_as_layer(*l)
 
     @classmethod
-    def load_as_layer(cls, base, frames, offsets):
+    def load_as_layer(cls, base, frames, offsets, is_colour_mask):
         if frames == 1:
-            surface = load_sprite(base)
-            return cls([(surface, offsets[0])])
+            surface = load_sprite(base + '.png')
+            inst = cls([(surface, offsets[0])])
         else:
             fs = []
             for f in range(frames):
@@ -164,17 +181,28 @@ class Animation(object):
                 surface = load_sprite(fname)
                 offset = offsets[f % len(offsets)]
                 fs.append((surface, offset))
-            return cls(fs)
+            inst = cls(fs)
+        inst.is_colour_mask = is_colour_mask
+        return inst
         
 
 class LayeredAnimationInstance(AnimationInstance):
-    def __init__(self, anim):
+    def __init__(self, anim, colour=None):
         self.anim = anim
-        self.layers = [layer.create_instance() for layer in anim.layers]
+        self.layers = []
+        for layer in anim.layers:
+            if layer.is_colour_mask:
+                self.layers.append(layer.create_instance(colour=colour))
+            else:
+                self.layers.append(layer.create_instance())
 
     def on_layer_finish(self, layer):
         self.finished = True
         self._fire_on_finish_handlers()
+
+    def draw(self, screen, pos):
+        for l in self.layers:
+            l.draw(screen, pos)
 
     def update(self, dt):
         if self.playing:
@@ -193,6 +221,13 @@ class LayeredAnimation(Animation):
     INSTANCE_CLASS = LayeredAnimationInstance
     def __init__(self, layers):
         self.layers = layers
+
+    def mirror(self):
+        ls = [l.mirror() for l in self.layers]
+        return LayeredAnimation(ls)
+
+    def colourise(self, colour):
+        pass
 
     @classmethod
     def from_file(cls, filename):

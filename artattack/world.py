@@ -37,7 +37,8 @@ class Actor(Loadable):
 
     def __init__(self, pos):
         self.pos = pos
-        self.sprite = self.DEFAULT_SPRITE
+        self.sprite = None
+        self.play(self.DEFAULT_SPRITE)
 
     def __str__(self):
         return '<%s at %s>' % (self.__class__.__name__, self.pos)
@@ -45,8 +46,12 @@ class Actor(Loadable):
     def kill(self):
         self.world.kill(self)
 
-    def get_sprite(self):
-        return self.sprites[self.sprite]
+    def play(self, animation):
+        """Play an animation named in self.sprites"""
+        if animation == self.sprite:
+            return
+        self.sprite = animation
+        self.sprite_instance = self.sprites[self.sprite].create_instance()
 
     def update(self, dt):
         sprite = self.get_sprite()
@@ -54,7 +59,7 @@ class Actor(Loadable):
             self.sprite.update(dt)
 
     def draw(self, screen):
-        self.get_sprite().draw(screen, floor_to_screen(self.pos))
+        self.sprite_instance.draw(screen, floor_to_screen(self.pos))
 
     def handle_collision(self, ano):
         """Handle a collision between this actor and another.

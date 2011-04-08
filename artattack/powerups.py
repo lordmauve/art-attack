@@ -40,7 +40,7 @@ class Powerup(Actor):
 
     def draw(self, screen):
         x, y = floor_to_screen(self.pos)
-        self.get_sprite().draw(screen, (x, y - self.alt))
+        self.sprite_instance.draw(screen, (x, y - self.alt))
 
 
 class PowerupFactory(object):
@@ -97,10 +97,12 @@ class PaintCan(Powerup):
     def __init__(self, pos, colour):
         super(PaintCan, self).__init__(pos)
         self.colour = colour
+        self.sprite_instance = self.colour.paint_can
 
-    def get_sprite(self):
-        return self.colour.paint_can
-
+    def play(self, animation):
+        # Doesn't use sprite system yet
+        pass
+    
     def pickup(self, player):
         player.palette.add_colour(self.colour)
 

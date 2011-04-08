@@ -36,7 +36,7 @@ def load(filename, mode='rb'):
 
 
 anim_comment_re = re.compile(r'#.*$')
-anim_line_re = re.compile(r'^(?P<key>base|frames|offsets):\s*(?P<value>.*)$')
+anim_line_re = re.compile(r'^(?P<key>base|frames|colour|offsets):\s*(?P<value>.*)$')
 
 def load_anim_def(filename):
     '''Open an animation definition file and parse the contents.
@@ -47,6 +47,7 @@ def load_anim_def(filename):
     base = None
     frames = None
     offsets = []
+    colour = False
     for line, l in enumerate(f):
         line += 1
         l = anim_comment_re.sub('', l).rstrip()
@@ -68,13 +69,16 @@ def load_anim_def(filename):
                 elif not offsets:
                     print >>sys.stderr, "Warning: animation layer %s missing offsets (%s, line %d)" % (base, filename, line)
                 else: 
-                    layers.append((base, frames, offsets))
+                    layers.append((base, frames, offsets, colour))
 
             base = value
             frames = None
             offsets = []
+            colour = False
         elif key == 'frames':
             frames = int(value)
+        elif key == 'colour':
+            colour = value.lower() == 'true'
         elif key == 'offsets':
             coords = value.split(' ')
             offsets = []
@@ -90,7 +94,7 @@ def load_anim_def(filename):
         elif not offsets:
             print >>sys.stderr, "Warning: animation layer %s missing offsets (%s, line %d)" % (base, filename, line)
         else: 
-            layers.append((base, frames, offsets))
+            layers.append((base, frames, offsets, colour))
 
     return layers
 

@@ -45,14 +45,22 @@ class PlayerCharacter(Actor):
     HIT_TIME = 0.5 #seconds, how long you are stunned when hit
 
     def __init__(self, pos, player):
-        super(PlayerCharacter, self).__init__(pos)
         self.player = player
+        super(PlayerCharacter, self).__init__(pos)
         self.brush_pos = None  # The position the character should try to get to
-        self.sprite = self.DEFAULT_SPRITE
         self.painting = 0
         self.dir = 'right'
         self.attacking = 0
         self.hit = 0
+        self.sprite = None
+        self.play(self.DEFAULT_SPRITE)
+
+    def play(self, animation):
+        """Play an animation named in self.sprites"""
+        if animation == self.sprite:
+            return
+        self.sprite = animation
+        self.sprite_instance = self.sprites[self.sprite].create_instance(colour=self.player.palette.get_selected())
 
     def track_brush(self, pos):
         """Update the position of the brush (in floor space)."""
@@ -102,13 +110,15 @@ class PlayerCharacter(Actor):
             self.painting -= dt
 
         if self.hit > 0:
-            self.sprite = 'hit'
+            sprite = 'hit'
         elif self.attacking > self.ATTACK_INTERVAL:
-            self.sprite = 'standing-attack'
+            sprite = 'standing-attack'
         elif self.painting > 0:
-            self.sprite = 'painting-%s' % self.dir
+            sprite = 'painting-%s' % self.dir
         else:
-            self.sprite = 'standing-%s' % self.dir
+            sprite = 'standing-%s' % self.dir
+
+        self.play(sprite)
 
     def get_hit_region(self):
         tl = self.pos + Vector([0, -40])
@@ -169,9 +179,9 @@ class PlayerCharacter(Actor):
 
 class RedPlayerCharacter(PlayerCharacter):
     SPRITES = {
-        'painting-left': sprite('red-artist-painting-left', (-50, -160)),
-        'painting-centre': sprite('red-artist-painting-centre', (-31, -150)),
-        'painting-right': sprite('red-artist-painting-right', (-60, -126)),
+        'painting-left': anim('red-artist-painting-left'),
+        'painting-centre': anim('red-artist-painting-centre'),
+        'painting-right': anim('red-artist-painting-right'),
         'standing-left': sprite('red-artist-standing-left', (-50, -165)),
         'standing-centre': sprite('red-artist-standing-centre', (-59, -157)),
         'standing-right': sprite('red-artist-standing-right', (-68, -116)),
@@ -219,6 +229,8 @@ class PlayerPalette(Loadable):
         self.change_time = 0
 
     def get_selected(self):
+        if self.selected is None:
+            return None
         return self.colours[self.selected]
 
     def next(self):
