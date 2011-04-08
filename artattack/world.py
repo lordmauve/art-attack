@@ -12,7 +12,6 @@ There are various mappings between these spaces.
 
 import random
 
-from .player import RedPlayer, BluePlayer
 from .artwork import *
 
 from .data import filepath
@@ -25,13 +24,24 @@ BACKGROUND = filepath('background.png', subdir='background')
 LEFT_ARTWORK = 0
 RIGHT_ARTWORK = 1
 
+COLLISION_GROUP_PLAYER = 1
+COLLISION_GROUP_POWERUP = 2
 
 class Actor(Loadable):
     DEFAULT_SPRITE = 'undefined'
 
+    COLLISION_GROUP = 0
+    RADIUS = 10
+
     def __init__(self, pos):
         self.pos = pos
         self.sprite = self.DEFAULT_SPRITE
+
+    def __str__(self):
+        return '<%s at %s>' % (self.__class__.__name__, self.pos)
+
+    def kill(self):
+        self.world.kill(self)
 
     def get_sprite(self):
         return self.sprites[self.sprite]
@@ -43,6 +53,13 @@ class Actor(Loadable):
 
     def draw(self, screen):
         self.get_sprite().draw(screen, floor_to_screen(self.pos))
+
+    def handle_collision(self, ano):
+        """Handle a collision between this actor and another.
+        
+        Default behaviour is to do nothing.
+        
+        """
         
 
 
@@ -151,8 +168,10 @@ class World(object):
     """
     def __init__(self, painting):
         from .powerups import PowerupFactory
+        from .player import RedPlayer, BluePlayer
         self.painting = painting
         self.background = pygame.image.load(BACKGROUND).convert()
+        self.actors = []
 
         outlines = self.painting.build_outline_surface(*ARTWORK_SIZE)
 
@@ -172,15 +191,18 @@ class World(object):
         # Also for convenience
         self.players = (self.red_player, self.blue_player)
 
-        self.actors = [self.red_player.pc, self.blue_player.pc]
+        for p in self.players:
+            self.spawn(p.pc)
 
         self.powerup_factory = PowerupFactory(self)
 
     def spawn(self, actor):
         actor.world = self
+        actor.alive = True
         self.actors.append(actor)
 
     def kill(self, actor):
+        actor.alive = False
         self.actors.remove(actor)
 
     def get_floor_space(self):
@@ -208,10 +230,32 @@ class World(object):
             self.powerup_factory.drop(side)
 
     def update(self, dt):
+        for p in self.players:
+            p.update(dt)
+
         for a in self.actors:
             a.update(dt)
 
-        #self.powerup_factory.update(dt)
+        self.handle_collisions()
+
+        self.powerup_factory.update(dt)
+
+    def handle_collisions(self):
+        """Brute force collision detection with O(n^2) time complexity.
+        """
+        acs = self.actors[:]
+        for i, a in enumerate(acs):
+            if not a.alive:
+                continue
+
+            for b in acs[i + 1:]:
+                if not b.alive:
+                    continue
+
+                if a.COLLISION_GROUP & b.COLLISION_GROUP:
+                    if (b.pos - a.pos).length2 < (a.RADIUS + b.RADIUS) * (a.RADIUS + b.RADIUS):
+                        #print a, "collides", b
+                        a.handle_collision(b)
 
     def draw(self, screen):
         screen.blit(self.background, (0, 0))

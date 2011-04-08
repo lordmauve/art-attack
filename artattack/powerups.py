@@ -1,7 +1,7 @@
 import random
 
 from .animation import sprite
-from .world import Actor, floor_to_screen, LEFT_ARTWORK, RIGHT_ARTWORK
+from .world import Actor, floor_to_screen, LEFT_ARTWORK, RIGHT_ARTWORK, COLLISION_GROUP_PLAYER
 
 from vector import Vector
 
@@ -12,10 +12,12 @@ class Powerup(Actor):
     WEIGHT = 1 # The relative likelihood that this powerup will be dropped
     COLOUR = False # Needs random colour
 
+    COLLISION_GROUP = 0
+
     def __init__(self, pos):
         super(Powerup, self).__init__(pos)
         self.pos = pos
-        self.alt = 800
+        self.alt = 600
         self.valt = 0
 
     def update(self, dt):
@@ -25,6 +27,11 @@ class Powerup(Actor):
         else:
             self.valt = 0
             self.alt = 0
+            self.COLLISION_GROUP = COLLISION_GROUP_PLAYER
+
+    def handle_collision(self, pc):
+        self.pickup(pc.player)
+        self.kill()
 
     def pickup(self, player):
         raise NotImplementedError("Subclasses must implement this method.")
