@@ -25,6 +25,7 @@ NO_WINNER = -1
 
 class GameState(object):
     def __init__(self, painting):
+        Label.load()
         PaintColour.load()
         RedPlayer.load()
         BluePlayer.load()

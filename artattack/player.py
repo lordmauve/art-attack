@@ -8,6 +8,7 @@ from vector import Vector
 
 from .world import Actor, COLLISION_GROUP_PLAYER, COLLISION_GROUP_POWERUP
 from .tools import Brush
+from .text import Label
 from .animation import Loadable, sprite, anim, mirror_anim
 
 
@@ -252,6 +253,12 @@ class Player(object):
         self.tool = None
         self.set_tool(Brush(self, start_pos))
 
+        self.create_labels()
+
+    def create_labels(self):
+        """Create the labels for the player's score"""
+        raise NotImplementedError()
+
     def set_other_player(self, other_player):
         self.pc.other_player = other_player.pc
 
@@ -268,11 +275,8 @@ class Player(object):
         complete, total = self.artwork.completeness()
         percent = u'%0.1f%% complete' % (complete * 100.0 / total)
         pixels = '%d correct / %d total' % (complete, total)
-        surf = self.score_font.render(percent, True, Color('white'))
-        screen.blit(surf, self.SCORE_COORDS)
-        surf = self.score_font.render(pixels, True, Color('white'))
-        sx, sy = self.SCORE_COORDS
-        screen.blit(surf, (sx, sy + 24))
+        self.percent_label.draw(screen, percent)
+        self.pixels_label.draw(screen, pixels)
 
     def paint(self):
         if self.tool:
@@ -310,8 +314,6 @@ class Player(object):
 
     @classmethod
     def load(cls):
-        if not hasattr(Player, 'font'):
-            Player.score_font = pygame.font.Font(pygame.font.get_default_font(), 18)
         cls.CHARACTER.load()
         cls.PALETTE_CLASS.load()
 
@@ -323,7 +325,9 @@ class RedPlayer(Player):
     PALETTE_CLASS = PlayerPaletteLeft
     CHARACTER = RedPlayerCharacter
 
-    SCORE_COORDS = (15, 135)
+    def create_labels(self):
+        self.percent_label = Label((15, 135))
+        self.pixels_label = Label((15, 159))
         
 
 class BluePlayer(Player):
@@ -333,4 +337,6 @@ class BluePlayer(Player):
     PALETTE_CLASS = PlayerPaletteRight
     CHARACTER = BluePlayerCharacter
 
-    SCORE_COORDS = (800, 135)
+    def create_labels(self):
+        self.percent_label = Label((1009, 135), align=Label.ALIGN_RIGHT)
+        self.pixels_label = Label((1009, 159), align=Label.ALIGN_RIGHT)

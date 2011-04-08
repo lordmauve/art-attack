@@ -10,6 +10,7 @@ from pygame.locals import *
 
 
 from .game import GameState, StartGameState
+from .text import Label
 
 
 DEFAULT_PAINTING = 'desert-island2.png'
