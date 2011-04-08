@@ -6,11 +6,12 @@ import pygame
 from pygame.color import Color
 from vector import Vector
 
+from .world import Actor, COLLISION_GROUP_PLAYER, COLLISION_GROUP_POWERUP
 from .tools import Brush
 from .animation import Loadable, sprite, anim, mirror_anim
 
 
-class PlayerCharacter(Loadable):
+class PlayerCharacter(Actor):
     """The player's avatar.
 
     The PlayerCharacter is not directly controlled, but moves
@@ -24,6 +25,9 @@ class PlayerCharacter(Loadable):
 
     DEFAULT_SPRITE = 'standing-right'
     DEFAULT_DIR = 'right'
+
+    COLLISION_GROUP = COLLISION_GROUP_PLAYER | COLLISION_GROUP_POWERUP
+    RADIUS = 20
 
     sprite_offsets = {
         'painting-left': (50, 160),
@@ -42,8 +46,9 @@ class PlayerCharacter(Loadable):
 
     MAX_SPEED = 500
 
-    def __init__(self, pos):
-        self.pos = pos # character position, in floor space
+    def __init__(self, pos, player):
+        super(PlayerCharacter, self).__init__(pos)
+        self.player = player
         self.brush_pos = None  # The position the character should try to get to
         self.sprite = self.DEFAULT_SPRITE
         self.painting = 0
@@ -111,15 +116,22 @@ class PlayerCharacter(Loadable):
         else:
             return v.rotated(v.angle_to(self.pos - self.other_player.pos) - 90)
 
+    def handle_collision(self, ano):
+        from .powerups import Powerup
+        if isinstance(ano, Powerup):
+            ano.handle_collision(self)
+        elif isinstance(ano, Player):
+            #TODO: resolve collision
+            pass
 
     @classmethod
-    def for_brush_pos(cls, brush_pos):
+    def for_brush_pos(cls, brush_pos, player):
         """Create an instance of a PlayerCharacter based on the position of the corresponding tool.""" 
         from .world import screen_to_floor, FORESHORTENING
         bx, by = cls.brush_offsets[cls.DEFAULT_DIR]
         off = Vector([bx, by * FORESHORTENING])
         floor_pos = brush_pos.floor_pos() - off
-        inst = cls(floor_pos)
+        inst = cls(floor_pos, player)
         inst.track_brush(brush_pos.floor_pos())
         return inst
 
@@ -235,7 +247,7 @@ class Player(object):
         self.world = world
         self.artwork = artwork
 
-        self.pc = self.CHARACTER.for_brush_pos(start_pos)
+        self.pc = self.CHARACTER.for_brush_pos(start_pos, self)
 
         self.tool = None
         self.set_tool(Brush(self, start_pos))
