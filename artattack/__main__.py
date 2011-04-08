@@ -33,12 +33,15 @@ class Game(object):
         gamestate.game = self
         self.gamestate = gamestate
 
+    def end(self):
+        self.keeprunning = False
+
     def run(self):
         clock = pygame.time.Clock()
         pygame.key.set_repeat(100, 30)
 
-        keeprunning = True
-        while keeprunning:
+        self.keeprunning = True
+        while self.keeprunning:
             dt = clock.tick(30) / 1000.0
             for event in pygame.event.get():
                 if event.type == QUIT:

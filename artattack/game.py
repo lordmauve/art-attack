@@ -18,6 +18,10 @@ from .tools import *
 from .world import World
 from .keybindings import get_keybindings
 
+WINNER_RED = 0
+WINNER_BLUE = 1
+NO_WINNER = -1
+
 
 class GameState(object):
     def __init__(self, painting):
@@ -28,11 +32,27 @@ class GameState(object):
         self.world = World.for_painting(painting)
         self.world.give_colour()
 
+    def get_winner(self):
+        red = self.world.red_player.artwork.completeness()[0]
+        blue = self.world.blue_player.artwork.completeness()[0]
+        if red > blue:
+            return WINNER_RED
+        elif red < blue:
+            return WINNER_BLUE
+        else:
+            return NO_WINNER            
+
+    def end_game(self):
+        winner = self.get_winner()
+        self.game.set_gamestate(EndGameState(self, winner))
+
     def on_key(self, event):
         if event.key == K_F10:
             self.world.give_all_colours()
         if event.key == K_F9:
             self.world.drop_powerups()
+        if event.key == K_F8:
+            self.end_game()
 
         keybindings = get_keybindings()
         ks = [
@@ -51,16 +71,38 @@ class GameState(object):
         self.world.draw(screen)
 
 
-class StartGameState(Loadable):
+class BannerGameState(Loadable):
+    def __init__(self, gamestate):
+        self.gamestate = gamestate
+        self.__class__.load()
+
+    def get_banners(self):
+        raise NotImplementedError("Subclasses should define this method to return a tuple (left_banner, right_banner).")
+
+    def draw(self, screen):
+        self.gamestate.draw(screen)
+
+        w, h = screen.get_size()
+
+        for i, banner in enumerate(self.get_banners()):
+            sw, sh = banner.get_size()
+        
+            x = i * w //  2 + w // 4 - sw // 2
+            y = h // 2 - sh // 2
+
+            banner.draw(screen, (x, y))
+
+
+class StartGameState(BannerGameState):
     SPRITES = {
         'ready': sprite('game-ready'),
         'steady': sprite('game-steady'),
         'paint': sprite('game-paint'),
     }
 
-    def  __init__(self, gamestate):
-        self.gamestate = gamestate
-        self.__class__.load()
+    def  __init__(self, gamestate, skippable=True):
+        super(StartGameState, self).__init__(gamestate)
+        self.skippable = skippable
         self.t = 0 
         self.sprite = 'ready'
 
@@ -77,18 +119,43 @@ class StartGameState(Loadable):
             self.sprite = 'ready'
 
     def on_key(self, event):
-        pass
+        if self.skippable:
+            if event.key == K_SPACE:
+                self.t += 1
 
-    def draw(self, screen):
-        self.gamestate.draw(screen)
-
-        w, h = screen.get_size()
+    def get_banners(self):
         s = self.sprites[self.sprite]
-        sw, sh = s.get_size()
-        
-        x1 = w // 4 - sw // 2
-        x2 = x1 + w // 2
-        y = h // 2 - sh // 2
-        s.draw(screen, (x1, y))
-        s.draw(screen, (x2, y))
+        return s, s
 
+
+class EndGameState(BannerGameState):
+    SPRITES = {
+        'winner': sprite('gameover-winner'),
+        'loser': sprite('gameover-loser', (0, 15)),
+        'draw': sprite('gameover-draw'),
+    }
+
+    def  __init__(self, gamestate, winner):
+        self.gamestate = gamestate
+        self.__class__.load()
+        self.t = 0 
+
+        if winner == WINNER_RED:
+            self.banners = 'winner', 'loser'
+        elif winner == WINNER_BLUE:
+            self.banners = 'loser', 'winner'
+        elif winner == NO_WINNER:
+            self.banners = 'draw', 'draw'
+
+    def get_banners(self):
+        return [self.sprites[s] for s in self.banners]
+
+    def update(self, dt):
+        self.t += dt
+
+        if self.t > 5:
+            self.game.end()
+
+    def on_key(self, event):
+        if event.key == K_SPACE:
+            self.t += 5
