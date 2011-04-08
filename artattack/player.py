@@ -42,6 +42,8 @@ class PlayerCharacter(Actor):
     ATTACK_DURATION = 0.4 #seconds, how long an attack lasts
     ATTACK_INTERVAL = 0.3 #seconds, how long between attacks
 
+    HIT_TIME = 0.5 #seconds, how long you are stunned when hit
+
     def __init__(self, pos, player):
         super(PlayerCharacter, self).__init__(pos)
         self.player = player
@@ -50,6 +52,7 @@ class PlayerCharacter(Actor):
         self.painting = 0
         self.dir = 'right'
         self.attacking = 0
+        self.hit = 0
 
     def track_brush(self, pos):
         """Update the position of the brush (in floor space)."""
@@ -62,6 +65,8 @@ class PlayerCharacter(Actor):
 
         if self.attacking > 0:
             self.attacking -= dt
+        if self.hit > 0:
+            self.hit -= dt
     
         bx, by = self.brush_offsets[self.dir]
         t = self.brush_pos - Vector([bx, by * FORESHORTENING])
@@ -96,7 +101,9 @@ class PlayerCharacter(Actor):
         if self.painting > 0:
             self.painting -= dt
 
-        if self.attacking > self.ATTACK_INTERVAL:
+        if self.hit > 0:
+            self.sprite = 'hit'
+        elif self.attacking > self.ATTACK_INTERVAL:
             self.sprite = 'standing-attack'
         elif self.painting > 0:
             self.sprite = 'painting-%s' % self.dir
@@ -113,7 +120,7 @@ class PlayerCharacter(Actor):
         return tl, br
 
     def attack(self):
-        if self.attacking > 0:
+        if self.attacking > 0 or self.hit > 0:
             return
         self.attacking = self.ATTACK_INTERVAL + self.ATTACK_DURATION
         region = self.get_hit_region()
@@ -124,6 +131,7 @@ class PlayerCharacter(Actor):
                 a.on_hit(self.ATTACK_VECTOR)
 
     def on_hit(self, attack_vector):
+        self.hit = self.HIT_TIME
         self.pos += attack_vector
         if self.player.tool:
             x, y = attack_vector
@@ -168,6 +176,7 @@ class RedPlayerCharacter(PlayerCharacter):
         'standing-centre': sprite('red-artist-standing-centre', (-59, -157)),
         'standing-right': sprite('red-artist-standing-right', (-68, -116)),
         'standing-attack': sprite('red-artist-standing-attack', (-27, -100)),
+        'hit': sprite('red-artist-hit', (-67, -123)),
         'run-right': anim('red-artist-run'),
         'run-left': mirror_anim('red-artist-run'),
     }
@@ -184,6 +193,7 @@ class BluePlayerCharacter(PlayerCharacter):
         'standing-centre': sprite('blue-artist-standing-centre', (-59, -157)),
         'standing-right': sprite('blue-artist-standing-right', (-68, -116)),
         'standing-attack': sprite('blue-artist-standing-attack', (-154, -100)),
+        'hit': sprite('blue-artist-hit', (-57, -152)),
     }
 
     ATTACK_VECTOR = Vector([-150, 0])
