@@ -30,7 +30,9 @@ COLLISION_GROUP_POWERUP = 2
 class Actor(Loadable):
     DEFAULT_SPRITE = 'undefined'
 
-    COLLISION_GROUP = 0
+    COLLISION_GROUPS = 0
+    COLLISION_MASK = 0
+
     RADIUS = 10
 
     def __init__(self, pos):
@@ -252,7 +254,7 @@ class World(object):
                 if not b.alive:
                     continue
 
-                if a.COLLISION_GROUP & b.COLLISION_GROUP:
+                if a.COLLISION_MASK & b.COLLISION_GROUPS:
                     if (b.pos - a.pos).length2 < (a.RADIUS + b.RADIUS) * (a.RADIUS + b.RADIUS):
                         #print a, "collides", b
                         a.handle_collision(b)

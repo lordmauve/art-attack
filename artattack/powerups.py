@@ -1,7 +1,7 @@
 import random
 
 from .animation import sprite
-from .world import Actor, floor_to_screen, LEFT_ARTWORK, RIGHT_ARTWORK, COLLISION_GROUP_PLAYER
+from .world import Actor, floor_to_screen, LEFT_ARTWORK, RIGHT_ARTWORK, COLLISION_GROUP_PLAYER, COLLISION_GROUP_POWERUP
 
 from vector import Vector
 
@@ -12,7 +12,8 @@ class Powerup(Actor):
     WEIGHT = 1 # The relative likelihood that this powerup will be dropped
     COLOUR = False # Needs random colour
 
-    COLLISION_GROUP = 0
+    COLLISION_GROUPS = 0
+    COLLISION_MASK = 0
 
     def __init__(self, pos):
         super(Powerup, self).__init__(pos)
@@ -27,7 +28,8 @@ class Powerup(Actor):
         else:
             self.valt = 0
             self.alt = 0
-            self.COLLISION_GROUP = COLLISION_GROUP_PLAYER
+            self.COLLISION_GROUPS = COLLISION_GROUP_POWERUP
+            self.COLLISION_MASK = COLLISION_GROUP_PLAYER
 
     def handle_collision(self, pc):
         self.pickup(pc.player)
