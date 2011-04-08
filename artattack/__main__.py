@@ -8,7 +8,7 @@ import datetime
 import pygame
 from pygame.locals import *
 
-
+from .data import screenshot_path
 from .game import GameState, StartGameState
 from .text import Label
 
@@ -51,7 +51,7 @@ class Game(object):
                     if event.key == K_ESCAPE:
                         return
                     elif event.key == K_F12:
-                        self.save_screenshot(self.screen)
+                        self.save_screenshot()
                     self.gamestate.on_key(event)
 
             self.gamestate.update(dt)
