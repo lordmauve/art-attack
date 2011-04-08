@@ -42,10 +42,11 @@ class Powerup(Actor):
 
 
 class PowerupFactory(object):
-    DROP_MEAN = 30  # mean time between drops in seconds
-    DROP_SD = 8 # standard deviation in drop times
+    DROP_MEAN = 20  # mean time between drops in seconds
+    DROP_SD = 5 # standard deviation in drop times
 
     MIN_DELAY = 5
+    INITIAL_DELAY = 10 # give players something after 10s just to help them get started
 
     POWERUPS = []
 
@@ -56,9 +57,7 @@ class PowerupFactory(object):
     def __init__(self, world):
         self.world = world
         self.t = 0
-        self.nextdrop = [0, 0]
-        self.schedule_drop(0)
-        self.schedule_drop(1)
+        self.nextdrop = [self.INITIAL_DELAY, self.INITIAL_DELAY]
 
     def schedule_drop(self, side):
         delay = max(self.MIN_DELAY, random.normalvariate(self.DROP_MEAN, self.DROP_SD))
