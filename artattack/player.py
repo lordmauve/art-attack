@@ -46,6 +46,7 @@ class PlayerCharacter(Actor):
 
     def __init__(self, pos, player):
         self.player = player
+        self.sprite_colour = None
         super(PlayerCharacter, self).__init__(pos)
         self.brush_pos = None  # The position the character should try to get to
         self.painting = 0
@@ -57,10 +58,12 @@ class PlayerCharacter(Actor):
 
     def play(self, animation):
         """Play an animation named in self.sprites"""
-        if animation == self.sprite:
+        colour = self.player.palette.get_selected()
+        if animation == self.sprite and self.sprite_colour == colour:
             return
         self.sprite = animation
-        self.sprite_instance = self.sprites[self.sprite].create_instance(colour=self.player.palette.get_selected())
+        self.sprite_colour = colour
+        self.sprite_instance = self.sprites[self.sprite].create_instance(colour=colour)
 
     def track_brush(self, pos):
         """Update the position of the brush (in floor space)."""
@@ -182,9 +185,9 @@ class RedPlayerCharacter(PlayerCharacter):
         'painting-left': anim('red-artist-painting-left'),
         'painting-centre': anim('red-artist-painting-centre'),
         'painting-right': anim('red-artist-painting-right'),
-        'standing-left': sprite('red-artist-standing-left', (-50, -165)),
-        'standing-centre': sprite('red-artist-standing-centre', (-59, -157)),
-        'standing-right': sprite('red-artist-standing-right', (-68, -116)),
+        'standing-left': anim('red-artist-standing-left'),
+        'standing-centre': anim('red-artist-standing-centre'),
+        'standing-right': anim('red-artist-standing-right'),
         'standing-attack': sprite('red-artist-standing-attack', (-27, -100)),
         'hit': sprite('red-artist-hit', (-67, -123)),
         'run-right': anim('red-artist-run'),
@@ -196,12 +199,12 @@ class RedPlayerCharacter(PlayerCharacter):
 
 class BluePlayerCharacter(PlayerCharacter):
     SPRITES = {
-        'painting-left': sprite('blue-artist-painting-left', (-50, -160)),
-        'painting-centre': sprite('blue-artist-painting-centre', (-31, -150)),
-        'painting-right': sprite('blue-artist-painting-right', (-60, -126)),
-        'standing-left': sprite('blue-artist-standing-left', (-50, -165)),
-        'standing-centre': sprite('blue-artist-standing-centre', (-59, -157)),
-        'standing-right': sprite('blue-artist-standing-right', (-68, -116)),
+        'painting-left': anim('blue-artist-painting-left'),
+        'painting-centre': anim('blue-artist-painting-centre'),
+        'painting-right': anim('blue-artist-painting-right'),
+        'standing-left': anim('blue-artist-standing-left'),
+        'standing-centre': anim('blue-artist-standing-centre'),
+        'standing-right': anim('blue-artist-standing-right'),
         'standing-attack': sprite('blue-artist-standing-attack', (-154, -100)),
         'hit': sprite('blue-artist-hit', (-57, -152)),
     }

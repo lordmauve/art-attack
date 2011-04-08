@@ -1,0 +1,9 @@
+base: blue-artist-painting-centre
+frames: 1
+offsets: -31,-150
+
+base: paint-centre
+colour: true
+frames: 1
+offsets: -6,8
+

@@ -1,0 +1,9 @@
+base: red-artist-standing-right
+frames: 1
+offsets: -68,-116
+
+base: paint-standing-right
+colour: true
+frames: 1
+offsets: 47,-18
+

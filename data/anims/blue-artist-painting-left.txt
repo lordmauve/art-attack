@@ -1,4 +1,4 @@
-base: red-artist-painting-left
+base: blue-artist-painting-left
 frames: 1
 offsets: -50,-160
 
