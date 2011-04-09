@@ -43,7 +43,7 @@ class BaseConnection(Thread):
         while len(self.read_buf) > 4:
             size = struct.unpack('!I', b[:4])[0]
             if len(self.read_buf) < size + 4:
-                print "waiting for", len(self.read_buf) - size - 4, "more bytes"
+#                print "waiting for", len(self.read_buf) - size - 4, "more bytes"
                 break
             chunk = self.read_buf[4:size + 4]
             self.read_buf = self.read_buf[size + 4:]
@@ -61,7 +61,7 @@ class BaseConnection(Thread):
         buf = dumps(payload, -1)
         size = struct.pack('!I', len(buf))
 
-        print "Sending", len(size) + len(buf), "bytes"
+#        print "Sending", len(size) + len(buf), "bytes"
 
         self.socket.send(size + buf)
 
@@ -85,7 +85,7 @@ class BaseConnection(Thread):
                 wlist = [self.socket]
             else:
                 wlist = []
-            rlist, wlist, xlist = select([self.socket], wlist, [self.socket], 20)
+            rlist, wlist, xlist = select([self.socket], wlist, [self.socket], 0.02)
 
             if rlist:
                 self._read_socket()

@@ -196,7 +196,6 @@ class HostController(NetworkController):
         self.net.start()
         self.status_label = Label((768, 565), align=Label.ALIGN_CENTRE, size=16)
         self.status = 'Waiting for connection...'
-        super(HostController, self).__init__(painting, timelimit)
 
     def on_connect(self, remote_addr):
         self.set_status("Client connected.")
@@ -230,11 +229,11 @@ class ClientController(NetworkController):
 
     def __init__(self, host, port=DEFAULT_PORT):
         self.net = ClientSocket(host, port)
-        self.net.start()
         self.status_label = Label((256, 565), align=Label.ALIGN_CENTRE, size=16)
 
         self.g = GameplayGameState(None, 0)
         self.gs = ConnectingGameState()
+        self.net.start()
 
     def handle_start(self, arg):
         self.started = True
