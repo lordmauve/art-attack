@@ -15,11 +15,16 @@ class Powerup(Actor):
     COLLISION_GROUPS = 0
     COLLISION_MASK = 0
 
+    LIFETIME = 15
+    BLINK_TIME = 3
+    BLINK_RATE = 0.1
+
     def __init__(self, pos):
         super(Powerup, self).__init__(pos)
         self.pos = pos
         self.alt = 600
         self.valt = 0
+        self.age = 0
 
     def update(self, dt):
         if self.alt > 0:
@@ -31,6 +36,11 @@ class Powerup(Actor):
             self.COLLISION_GROUPS = COLLISION_GROUP_POWERUP
             self.COLLISION_MASK = COLLISION_GROUP_PLAYER
 
+            self.age += dt
+            
+            if self.age > self.LIFETIME:
+                self.kill()
+
     def handle_collision(self, pc):
         self.pickup(pc.player)
         self.kill()
@@ -39,6 +49,9 @@ class Powerup(Actor):
         raise NotImplementedError("Subclasses must implement this method.")
 
     def draw(self, screen):
+        if self.age > self.LIFETIME - self.BLINK_TIME:
+            if int((self.age - (self.LIFETIME - self.BLINK_TIME)) / self.BLINK_RATE) % 2 == 0:
+                return
         x, y = floor_to_screen(self.pos)
         self.sprite_instance.draw(screen, (x, y - self.alt))
 
