@@ -9,9 +9,12 @@ from Queue import Queue, Empty
 from select import select
 
 
-OP_CONNECT = 0  # Remote host has connected
+OP_ERR = -1 # Socket error
+OP_CONNECT = 0  # Connection established
 OP_START = 1    # Client/server ready, commence game
 OP_NAME = 2    # My name is
+OP_GAMECONFIG = 3    # Server sends painting and time limit
+OP_GIVE_COLOUR = 4  # Give colour, at the start of the game
 
 DEFAULT_PORT = 9067
 
@@ -40,6 +43,7 @@ class BaseConnection(Thread):
         while len(self.read_buf) > 4:
             size = struct.unpack('!I', b[:4])[0]
             if len(self.read_buf) < size + 4:
+                print "waiting for", len(self.read_buf) - size - 4, "more bytes"
                 break
             chunk = self.read_buf[4:size + 4]
             self.read_buf = self.read_buf[size + 4:]
@@ -57,6 +61,8 @@ class BaseConnection(Thread):
         buf = dumps(payload, -1)
         size = struct.pack('!I', len(buf))
 
+        print "Sending", len(size) + len(buf), "bytes"
+
         self.socket.send(size + buf)
 
     def establish_connection(self):
@@ -68,9 +74,12 @@ class BaseConnection(Thread):
 
     def run(self):
         self.keeprunning = True
-        self.establish_connection()
-        # Disable Nagle algorithm
-        self.socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        try:
+            self.establish_connection()
+        except socket.error, e:
+            self.receive_queue.put((OP_ERR, e.strerror))
+            return
+
         while self.keeprunning:
             if self.send_queue.qsize():
                 wlist = [self.socket]
@@ -86,7 +95,7 @@ class BaseConnection(Thread):
 
             if xlist:
                 pass
-                
+
 
 
 class ServerSocket(BaseConnection):
@@ -126,6 +135,7 @@ class ClientSocket(BaseConnection):
         
     def establish_connection(self):
         self.socket.connect(self.remote_addr)
+        self.receive_queue.put((OP_CONNECT, self.remote_addr))
 
 
 if __name__ == '__main__':

@@ -180,14 +180,14 @@
      inkscape:pageshadow="2"
      inkscape:zoom="1"
      inkscape:cx="319.46569"
-     inkscape:cy="1140.6521"
+     inkscape:cy="1620.6521"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
      inkscape:window-width="1280"
-     inkscape:window-height="723"
+     inkscape:window-height="722"
      inkscape:window-x="0"
-     inkscape:window-y="25"
+     inkscape:window-y="550"
      inkscape:window-maximized="1"
      showguides="true"
      inkscape:guide-bbox="true" />
@@ -1348,5 +1348,20 @@
            id="tspan3242"
            sodipodi:role="line">DRAW</tspan></text>
     </g>
+    <text
+       transform="scale(0.99694348,1.0030659)"
+       id="text3240-2"
+       y="-510.40149"
+       x="41.058426"
+       style="font-size:86.98260498px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-indent:0;text-align:center;text-decoration:none;line-height:normal;letter-spacing:1.14677453;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:middle;color:#000000;fill:#2c89a0;fill-opacity:1;fill-rule:evenodd;stroke:#00222b;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Balcony Angels;-inkscape-font-specification:Balcony Angels Bold"
+       xml:space="preserve"
+       inkscape:export-filename="/home/mauve/dev/pyweek-wasabi/data/sprites/connecting.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90"><tspan
+         style="text-align:center;text-anchor:middle;stroke:#00222b;stroke-width:2"
+         y="-510.40149"
+         x="41.631821"
+         id="tspan3242-6"
+         sodipodi:role="line">CONNECTING...</tspan></text>
   </g>
 </svg>

@@ -21,14 +21,29 @@ class Painting(object):
     """
 
     def __init__(self, filename):
-        self.filename = filename
-        self.load()
+        self.load(filename)
 
-    def load(self):
-        fpath = filepath(self.filename, subdir=PAINTINGS_DIR)
-        self.painting = pygame.image.load(fpath)
+    def load(self, filename):
+        fpath = filepath(filename, subdir=PAINTINGS_DIR)
+        self.set_painting(pygame.image.load(fpath))
+
+    def set_painting(self, surf):
+        self.painting = surf
         self.surface = pygame.transform.scale(self.painting, (240, 160)).convert()
         self.palette = [PaintColour(i, c) for i, c in enumerate(self.painting.get_palette())]
+
+    def __getstate__(self):
+        return {
+            'palette': [(c.r, c.g, c.b) for c in self.painting.get_palette()],
+            'painting': pygame.image.tostring(self.painting, 'P'),
+            'size': self.painting.get_size(),
+        }
+
+    def __setstate__(self, state):
+        pal = [Color(*c) for c in state['palette']]
+        painting = pygame.image.fromstring(state['painting'], state['size'], 'P')
+        painting.set_palette(pal)
+        self.set_painting(painting)
 
     def get_palette(self):
         return self.palette 

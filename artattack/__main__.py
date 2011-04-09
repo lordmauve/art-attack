@@ -9,7 +9,7 @@ import pygame
 from pygame.locals import *
 
 from .data import screenshot_path
-from .game import GameState, StartGameState
+from .game import TwoPlayerController, HostController, ClientController
 from .text import Label
 
 
@@ -26,9 +26,6 @@ class Game(object):
         pygame.init()
         self.screen = pygame.display.set_mode((1024, 600))
         self.gamestate = None
-
-    def start_game(self, gamestate):
-        self.set_gamestate(StartGameState(gamestate))
 
     def set_gamestate(self, gamestate):
         gamestate.game = self
@@ -65,7 +62,27 @@ class Game(object):
 
 def main(painting=DEFAULT_PAINTING, timelimit=120):
     game = Game()
-    game.start_game(GameState(painting, timelimit=timelimit))
+    game.set_gamestate(TwoPlayerController(painting, timelimit=timelimit))
     game.run()
     pygame.quit()
+
+
+def host(painting=DEFAULT_PAINTING, timelimit=120, port=None):
+    game = Game()
+    if port is not None:
+        gs = HostController(painting, timelimit=timelimit, port=port)
+    else:
+        gs = HostController(painting, timelimit=timelimit)
+    game.set_gamestate(gs)
+    game.run()
+    pygame.quit()
+
+def connect(host, port=None):
+    game = Game()
+    if port is not None:
+        gs = ClientController(host, port)
+    else:
+        gs = ClientController(host)
+    game.set_gamestate(gs)
+    game.run()
     pygame.quit()
