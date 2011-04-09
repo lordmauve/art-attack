@@ -18,6 +18,7 @@ OP_GIVE_COLOUR = 4  # Give colour, at the start of the game
 OP_POWERUP_SPAWN = 5 # Powerup spawned
 OP_PALETTE_CHANGE = 6  # Palette changed (order/colours etc)
 OP_TOOL_MOVE = 7 # Player tool moved
+OP_PAINT = 8 # Player used a tool
 
 DEFAULT_PORT = 9067
 
@@ -33,6 +34,7 @@ class BaseConnection(Thread):
 
     def send_message(self, op, payload):
         buf = dumps((op, payload), -1)
+        print op, '-> len', len(buf)
         self.send_queue.put(buf)
 
     def receive_message(self):
@@ -51,7 +53,7 @@ class BaseConnection(Thread):
 
         self.read_buf += b
         while len(self.read_buf) > 4:
-            size = struct.unpack('!I', b[:4])[0]
+            size = struct.unpack('!I', self.read_buf[:4])[0]
             if len(self.read_buf) < size + 4:
 #                print "waiting for", len(self.read_buf) - size - 4, "more bytes"
                 break
@@ -60,7 +62,8 @@ class BaseConnection(Thread):
             self._recv_chunk(chunk)
     
     def _recv_chunk(self, chunk):
-        self.receive_queue.put(loads(chunk))
+        payload = loads(chunk)
+        self.receive_queue.put(payload)
 
     def _write_socket(self):
         try:
@@ -96,12 +99,16 @@ class BaseConnection(Thread):
                 wlist = []
             rlist, wlist, xlist = select([self.socket], wlist, [self.socket], 0.02)
 
-            if rlist:
-                self._read_socket()
-            elif wlist:
-                self._write_socket()
-            elif xlist:
-                pass
+            try:
+                if rlist:
+                    self._read_socket()
+                elif wlist:
+                    self._write_socket()
+                elif xlist:
+                    pass
+            except:
+                self.receive_queue.put((OP_ERR, "Networking crashed :("))
+                break
 
         self.socket.close()
 
