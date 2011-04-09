@@ -59,6 +59,14 @@ class Game(object):
         pygame.image.save(self.screen, screenshot_path(datetime.datetime.now().strftime('screenshot_%Y-%m-%d_%H:%M:%S.png')))
 
 
+def menu():
+    from .menu import GameMenu
+    game = Game()
+    game.set_gamestate(GameMenu())
+    game.run()
+    pygame.quit()
+
+
 def main(painting=DEFAULT_PAINTING, timelimit=120):
     game = Game()
     game.set_gamestate(TwoPlayerController(painting, timelimit=timelimit))
@@ -75,6 +83,7 @@ def host(painting=DEFAULT_PAINTING, timelimit=120, port=None):
     game.set_gamestate(gs)
     game.run()
     pygame.quit()
+
 
 def connect(host, port=None):
     game = Game()

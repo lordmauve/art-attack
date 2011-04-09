@@ -27,4 +27,5 @@ if __name__ == "__main__":
         port = int(mo.group(3))
         artattack.__main__.connect(host, port)
     else:
-        artattack.__main__.main(options.painting, options.timelimit)
+#        artattack.__main__.main(options.painting, options.timelimit)
+         artattack.__main__.menu()
