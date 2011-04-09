@@ -1,23 +1,23 @@
 from pygame.locals import *
 
 KEYBINDINGS = {
-    'red': {
-        K_w: 'up',
-        K_s: 'down',
-        K_a: 'left',
-        K_d: 'right',
-        K_f: 'paint',
-        K_g: 'next_colour',
-        K_r: 'attack',
+    'alt': {
+        'up': K_w,
+        'down': K_s,
+        'left': K_a,
+        'right': K_d,
+        'paint': K_f,
+        'next_colour': K_g,
+        'attack': K_r,
     },
-    'blue': {
-        K_UP: 'up',
-        K_DOWN: 'down',
-        K_LEFT: 'left',
-        K_RIGHT: 'right',
-        K_INSERT: 'paint',
-        K_DELETE: 'next_colour',
-        K_END: 'attack',
+    'cursors': {
+        'up': K_UP,
+        'down': K_DOWN,
+        'left': K_LEFT,
+        'right': K_RIGHT,
+        'paint': K_INSERT,
+        'next_colour': K_DELETE,
+        'attack': K_END,
     },
 }
 

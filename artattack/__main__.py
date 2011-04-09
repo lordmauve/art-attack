@@ -36,7 +36,6 @@ class Game(object):
 
     def run(self):
         clock = pygame.time.Clock()
-        pygame.key.set_repeat(100, 30)
 
         self.keeprunning = True
         while self.keeprunning:

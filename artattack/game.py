@@ -17,6 +17,7 @@ from .player import *
 from .tools import *
 from .world import World, ArtworkPosition
 from .keybindings import get_keybindings
+from .keycontroller import KeyController
 from .powerups import PowerupFactory
 from .signals import Signal
 
@@ -102,12 +103,17 @@ class GameStateController(object):
 
         world.on_pc_hit.connect(self.handle_pc_hit)
 
+        self.keycontrollers = self.get_controllers(world.red_player, world.blue_player)
+
         self.start_game()
 
     def start_game(self):
         self.gs = StartGameState(self.g)
         self.gs.on_finish.connect(self.on_countdown_finish)
 
+    def get_controllers(self, red, blue):
+        pass
+    
     def on_gameover_finish(self):
         self.game.end()
 
@@ -120,6 +126,8 @@ class GameStateController(object):
         self.gs.on_finish.connect(self.on_gameover_finish)
 
     def update(self, dt):
+        for k in self.keycontrollers:
+            k.update(dt)
         self.gs.update(dt)
 
     def draw(self, screen):
@@ -130,6 +138,13 @@ class GameStateController(object):
 
 
 class TwoPlayerController(GameStateController):
+    def get_controllers(self, red, blue):
+        keybindings = get_keybindings()
+        return [
+            KeyController(red, keybindings['alt']),
+            KeyController(blue, keybindings['cursors'])
+        ]
+
     def on_key(self, event):
         if event.key == K_F8:
             self.end_game()
@@ -142,15 +157,8 @@ class TwoPlayerController(GameStateController):
             if event.key == K_F9:
                 self.gs.world.drop_powerups()
 
-            keybindings = get_keybindings()
-            ks = [
-                (keybindings['red'], self.gs.world.red_player),
-                (keybindings['blue'], self.gs.world.blue_player),
-            ]
-
-            for (keyset, player) in ks:
-                if event.key in keyset:
-                    getattr(player, keyset[event.key])()
+            for k in self.keycontrollers:
+                k.on_key_down(event)
 
 
 from .network import *
@@ -170,6 +178,8 @@ class NetworkController(GameStateController):
     def update(self, dt):
         self.process_request()
         if self.started:
+            for k in self.keycontrollers:
+                k.update(dt)
             self.gs.update(dt)
 
     def process_request(self):
@@ -248,6 +258,10 @@ class NetworkController(GameStateController):
         pc = world.players[actor_id].pc
         pc.pos = pos
         pc.attack()
+
+    def on_key(self, event):
+        for k in self.keycontrollers:
+            k.on_key_down(event)
         
 
 
@@ -271,6 +285,12 @@ class HostController(NetworkController):
         self.status_label = Label((768, 565), align=Label.ALIGN_CENTRE, size=16)
         self.status = 'Waiting for connection...'
         self.connect_game_signals()
+
+    def get_controllers(self, red, blue):
+        keybindings = get_keybindings()
+        return [
+            KeyController(red, keybindings['cursors']),
+        ]
 
     def connect_game_signals(self):
         world = self.g.world
@@ -300,17 +320,6 @@ class HostController(NetworkController):
     def on_connect(self, remote_addr):
         self.set_status("Client connected.")
         self.send_gameconfig()
-
-    def on_key(self, event):
-        if hasattr(self.gs, 'world'):
-            keybindings = get_keybindings()
-            ks = [
-                (keybindings['red'], self.gs.world.red_player),
-            ]
-
-            for (keyset, player) in ks:
-                if event.key in keyset:
-                    getattr(player, keyset[event.key])()
 
     def send_gameconfig(self):
         world = self.g.world
@@ -345,9 +354,16 @@ class ClientController(NetworkController):
         self.net = ClientSocket(host, port)
         self.status_label = Label((256, 565), align=Label.ALIGN_CENTRE, size=16)
 
+        self.keycontrollers = []
         self.g = GameplayGameState(None, 0)
         self.gs = ConnectingGameState()
         self.net.start()
+
+    def get_controllers(self, red, blue):
+        keybindings = get_keybindings()
+        return [
+            KeyController(blue, keybindings['cursors']),
+        ]
 
     def end_game(self):
         self.net.send_message(OP_ENDGAME, None)
@@ -380,6 +396,7 @@ class ClientController(NetworkController):
         world.blue_player.on_tool_move.connect(self.on_tool_move)
         world.blue_player.on_paint.connect(self.on_paint)
         world.blue_player.on_attack.connect(self.attack)
+        self.keycontrollers = self.get_controllers(world.red_player, world.blue_player)
 
     def handle_powerup_spawn(self, powerup):
         world = self.g.world
@@ -391,19 +408,6 @@ class ClientController(NetworkController):
         actor_id, vector = hit
         world = self.g.world
         world.players[actor_id].pc.hit(vector)
-
-    def on_key(self, event):
-        if not hasattr(self.gs, 'world'):
-            return
-
-        keybindings = get_keybindings()
-        ks = [
-            (keybindings['blue'], self.gs.world.blue_player),
-        ]
-
-        for (keyset, player) in ks:
-            if event.key in keyset:
-                getattr(player, keyset[event.key])()
     
     def on_time_out(self):
         # Wait for the server to end the game
