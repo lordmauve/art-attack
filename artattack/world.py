@@ -184,6 +184,8 @@ class World(object):
     def __init__(self, painting, powerups=True):
         from .powerups import PowerupFactory
         from .player import RedPlayer, BluePlayer
+        self.next_id = 0
+
         self.painting = painting
         self.background = pygame.image.load(BACKGROUND).convert()
         self.actors = []
@@ -215,8 +217,14 @@ class World(object):
             self.powerup_factory = False
 
         self.on_powerup_spawn = Signal()
+        self.on_pc_hit = Signal()
 
-    def spawn(self, actor):
+    def spawn(self, actor, id=None):
+        if id is not None:
+            actor.id = id
+        else:
+            actor.id = self.next_id
+            self.next_id += 1
         actor.world = self
         actor.alive = True
         self.actors.append(actor)
@@ -225,9 +233,9 @@ class World(object):
         actor.alive = False
         self.actors.remove(actor)
 
-    def spawn_powerup(self, powerup):
+    def spawn_powerup(self, powerup, id=None):
+        self.spawn(powerup, id=id)
         self.on_powerup_spawn.fire(powerup)
-        self.spawn(powerup)
 
     def get_floor_space(self):
         """Compute the top left and bottom right floor positions of the space"""

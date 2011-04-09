@@ -20,6 +20,8 @@ OP_PALETTE_CHANGE = 6  # Palette changed (order/colours etc)
 OP_TOOL_MOVE = 7 # Player tool moved
 OP_PAINT = 8 # Player used a tool
 OP_ENDGAME = 9 # The game is over
+OP_ATTACK = 10 # A player is attacking
+OP_HIT = 11 # A player has been hit
 
 DEFAULT_PORT = 9067
 

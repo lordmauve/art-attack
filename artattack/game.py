@@ -100,6 +100,8 @@ class GameStateController(object):
         self.g.on_time_over.connect(self.end_game)
         self.gs = self.g
 
+        world.on_pc_hit.connect(self.handle_pc_hit)
+
         self.start_game()
 
     def start_game(self):
@@ -122,6 +124,9 @@ class GameStateController(object):
 
     def draw(self, screen):
         self.gs.draw(screen)
+
+    def handle_pc_hit(self, pc, attack_vector):
+        pc.hit(attack_vector)
 
 
 class TwoPlayerController(GameStateController):
@@ -189,6 +194,13 @@ class NetworkController(GameStateController):
         self.net.send_message(OP_TOOL_MOVE, (player.ID, pos.to_net()))
 
     def handle_tool_move(self, player_pos):
+        # FIXME: there's the possibility that tool moves issued by the server
+        # (eg. on being hit) and the client could cross, in which case one
+        # would overwrite the other
+        # 
+        # This would make the game go out of sync, so it must not be allowed
+        # to happen
+    
         world = self.g.world
         playerid, pos = player_pos
         pos = ArtworkPosition.from_net(pos, self.g.world)
@@ -226,6 +238,16 @@ class NetworkController(GameStateController):
 
         #TODO: server should sync back the pixels under the tool
         # to eliminate race conditions with one player overpainting the other
+
+    def attack(self, pc, region):
+        self.net.send_message(OP_ATTACK, (pc.id, pc.pos))
+
+    def handle_attack(self, attack):
+        actor_id, pos = attack
+        world = self.g.world
+        pc = world.players[actor_id].pc
+        pc.pos = pos
+        pc.attack()
         
 
 
@@ -239,6 +261,7 @@ class HostController(NetworkController):
         OP_TOOL_MOVE: 'handle_tool_move',
         OP_PAINT: 'handle_paint',
         OP_ENDGAME: 'handle_end_game',
+        OP_ATTACK: 'handle_attack',
     }
 
     def __init__(self, painting, timelimit=120, port=DEFAULT_PORT):
@@ -255,6 +278,11 @@ class HostController(NetworkController):
         world.red_player.on_palette_change.connect(self.on_palette_change)
         world.red_player.on_tool_move.connect(self.on_tool_move)
         world.red_player.on_paint.connect(self.on_paint)
+        world.red_player.on_attack.connect(self.attack)
+
+    def handle_pc_hit(self, pc, attack_vector):
+        pc.hit(attack_vector)
+        self.net.send_message(OP_HIT, (pc.id, attack_vector))
 
     def end_game(self):
         # Do nothing, wait for the client to send OP_ENDGAME, which means all game
@@ -267,7 +295,7 @@ class HostController(NetworkController):
         self.net.send_message(OP_ENDGAME, winner)
 
     def on_powerup_spawn(self, powerup):
-        self.net.send_message(OP_POWERUP_SPAWN, (powerup.__class__, powerup.to_net()))
+        self.net.send_message(OP_POWERUP_SPAWN, (powerup.__class__, powerup.id, powerup.to_net()))
 
     def on_connect(self, remote_addr):
         self.set_status("Client connected.")
@@ -309,6 +337,8 @@ class ClientController(NetworkController):
         OP_TOOL_MOVE: 'handle_tool_move',
         OP_PAINT: 'handle_paint',
         OP_ENDGAME: 'handle_end_game',
+        OP_ATTACK: 'handle_attack',
+        OP_HIT: 'handle_hit',
     }
 
     def __init__(self, host, port=DEFAULT_PORT):
@@ -349,12 +379,18 @@ class ClientController(NetworkController):
         world.blue_player.on_palette_change.connect(self.on_palette_change)
         world.blue_player.on_tool_move.connect(self.on_tool_move)
         world.blue_player.on_paint.connect(self.on_paint)
+        world.blue_player.on_attack.connect(self.attack)
 
     def handle_powerup_spawn(self, powerup):
         world = self.g.world
-        cls, net = powerup
+        cls, id, net = powerup
         inst = cls.from_net(net, world.painting.get_palette_map())
-        world.spawn_powerup(inst)
+        world.spawn_powerup(inst, id=id)
+
+    def handle_hit(self, hit):
+        actor_id, vector = hit
+        world = self.g.world
+        world.players[actor_id].pc.hit(vector)
 
     def on_key(self, event):
         if not hasattr(self.gs, 'world'):

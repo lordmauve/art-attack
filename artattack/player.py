@@ -59,7 +59,7 @@ class PlayerCharacter(Actor):
         self.painting = 0
         self.dir = 'right'
         self.attacking = 0
-        self.hit = 0
+        self.hit_time = 0
         self.sprite = None
         self.play(self.DEFAULT_SPRITE)
 
@@ -86,8 +86,8 @@ class PlayerCharacter(Actor):
 
         if self.attacking > 0:
             self.attacking -= dt
-        if self.hit > 0:
-            self.hit -= dt
+        if self.hit_time > 0:
+            self.hit_time -= dt
     
         bx, by = self.brush_offsets[self.dir]
         t = self.tool.pos.floor_pos() - Vector([bx, by * FORESHORTENING])
@@ -122,7 +122,7 @@ class PlayerCharacter(Actor):
         if self.painting > 0:
             self.painting -= dt
 
-        if self.hit > 0:
+        if self.hit_time > 0:
             sprite = 'hit'
         elif self.attacking > self.ATTACK_INTERVAL:
             sprite = 'standing-attack'
@@ -143,7 +143,7 @@ class PlayerCharacter(Actor):
         return tl, br
 
     def attack(self):
-        if self.attacking > 0 or self.hit > 0:
+        if self.attacking > 0 or self.hit_time > 0:
             return
         self.sounds['swish'].play()
         self.attacking = self.ATTACK_INTERVAL + self.ATTACK_DURATION
@@ -152,11 +152,11 @@ class PlayerCharacter(Actor):
             if a is self:
                 continue
             if isinstance(a, PlayerCharacter):
-                a.on_hit(self.ATTACK_VECTOR)
+                self.world.on_pc_hit.fire(a, self.ATTACK_VECTOR)
 
-    def on_hit(self, attack_vector):
+    def hit(self, attack_vector):
         self.sounds['hit'].play()
-        self.hit = self.HIT_TIME
+        self.hit_time = self.HIT_TIME
         self.pos += attack_vector
         if self.tool:
             x, y = attack_vector
@@ -405,6 +405,8 @@ class Player(object):
 
     def attack(self):
         self.pc.attack()
+        region = self.pc.get_hit_region()
+        self.on_attack.fire(self.pc, region)
 
     def next_colour(self):
         self.palette.next()
