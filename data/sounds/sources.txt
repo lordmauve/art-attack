@@ -1,0 +1,8 @@
+Brush sounds
+http://www.freesound.org/samplesViewSingle.php?id=106395
+
+Attack Sound
+http://www.freesound.org/samplesViewSingle.php?id=47973
+
+Hit Sound
+http://www.freesound.org/samplesViewSingle.php?id=104170

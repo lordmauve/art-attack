@@ -105,3 +105,8 @@ def load_anim_def(filename):
 def load_sprite(fname):
     import pygame.image
     return pygame.image.load(filepath(fname, subdir='sprites')).convert_alpha()
+
+
+def load_sound(fname):
+    import pygame.mixer
+    return pygame.mixer.Sound(filepath(fname, subdir='sounds'))

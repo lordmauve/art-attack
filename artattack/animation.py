@@ -1,7 +1,7 @@
 from pygame import transform
 from pygame.locals import *
 
-from .data import load_sprite, load_anim_def
+from .data import load_sprite, load_anim_def, load_sound
 
 
 def sprite(name, off=(0, 0)):
@@ -29,6 +29,9 @@ def mirror_anim(name):
 class Loadable(object):
     """Base class of things that are made up of loadable sprites."""
 
+    SPRITES = {}
+    SOUNDS = {}
+
     @classmethod
     def load(cls):
         if hasattr(cls, 'sprites'):
@@ -41,6 +44,12 @@ class Loadable(object):
             sprites[k] = load()
 
         cls.sprites = sprites
+
+        sounds = {}
+        for k, filename in cls.SOUNDS.iteritems():
+            sounds[k] = load_sound(filename)
+
+        cls.sounds = sounds
 
 
 class Sprite(object):

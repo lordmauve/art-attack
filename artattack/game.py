@@ -28,6 +28,7 @@ class GameState(object):
         PaintColour.load()
         RedPlayer.load()
         BluePlayer.load()
+        Brush.load()
 
         self.world = World.for_painting(painting)
         self.world.give_colour()

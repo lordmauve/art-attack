@@ -1,10 +1,19 @@
 """Classes representing tools for painting onto an Artwork."""
 
+import random
+
 import pygame
 from pygame.color import Color
 
+from .animation import Loadable
 
-class Brush(object):
+class Brush(Loadable):
+    SOUNDS = {
+        'brush1': 'brush1.wav',
+        'brush2': 'brush2.wav',
+        'brush3': 'brush3.wav',
+    }
+
     """A 3x3 brush to paint onto an Artwork"""
     def __init__(self, world, pos):
         self.world = world
@@ -58,4 +67,8 @@ class Brush(object):
         for j in range(top, bottom + 1):
             for i in range(left, right + 1):
                 artwork.paint_pixel((i, j), colour)
+
+        sound = random.choice(self.sounds.values())
+        sound.play()
+
 

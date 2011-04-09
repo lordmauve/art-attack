@@ -1,5 +1,6 @@
 """Classes representing each player in the game."""
 
+import random
 import time
 
 import pygame
@@ -23,6 +24,11 @@ class PlayerCharacter(Actor):
     responsive control of the character which will be important for PvP.)
 
     """
+
+    SOUNDS = {
+        'hit': 'hit.wav',
+        'swish': 'swish.wav',
+    }
 
     DEFAULT_SPRITE = 'standing-right'
     DEFAULT_DIR = 'right'
@@ -135,6 +141,7 @@ class PlayerCharacter(Actor):
     def attack(self):
         if self.attacking > 0 or self.hit > 0:
             return
+        self.sounds['swish'].play()
         self.attacking = self.ATTACK_INTERVAL + self.ATTACK_DURATION
         region = self.get_hit_region()
         for a in self.world.actors_in_region(*region):
@@ -144,6 +151,7 @@ class PlayerCharacter(Actor):
                 a.on_hit(self.ATTACK_VECTOR)
 
     def on_hit(self, attack_vector):
+        self.sounds['hit'].play()
         self.hit = self.HIT_TIME
         self.pos += attack_vector
         if self.player.tool:
