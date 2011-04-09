@@ -9,6 +9,7 @@ from Queue import Queue, Empty
 from select import select
 
 
+OP_DISCONNECT = -2 # Disconnect
 OP_ERR = -1 # Socket error
 OP_CONNECT = 0  # Connection established
 OP_START = 1    # Client/server ready, commence game
@@ -22,6 +23,7 @@ OP_PAINT = 8 # Player used a tool
 OP_ENDGAME = 9 # The game is over
 OP_ATTACK = 10 # A player is attacking
 OP_HIT = 11 # A player has been hit
+
 
 DEFAULT_PORT = 9067
 
@@ -111,15 +113,24 @@ class BaseConnection(Thread):
                     self._read_socket()
                 elif wlist:
                     self._write_socket()
-                elif xlist:
-                    pass
             except:
                 self.receive_queue.put((OP_ERR, "Networking crashed :("))
                 break
+        self.close()
 
+    def __del__(self):
+        self.close()
+    
+    def close(self):
         if self.socket:
-            self.socket.close()
-
+            buf = dumps((OP_DISCONNECT, 0))
+            size = struct.pack('!I', len(buf))
+            try:
+                self.socket.send(size + buf)
+                self.socket.shutdown(socket.SHUT_RDWR)
+                self.socket.close()
+            except socket.error:
+                pass
 
 
 class ServerSocket(BaseConnection):
