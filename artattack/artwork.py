@@ -3,6 +3,8 @@
 import pygame
 from pygame.locals import *
 
+from cStringIO import StringIO
+
 from .data import filepath
 from .paint import PaintColour
 
@@ -25,7 +27,10 @@ class Painting(object):
 
     def load(self, filename):
         fpath = filepath(filename, subdir=PAINTINGS_DIR)
-        self.set_painting(pygame.image.load(fpath))
+
+        with open(fpath, 'rb') as f:
+            self.pngdata = f.read()
+        self.set_painting(pygame.image.load(StringIO(self.pngdata), fpath))
 
     def set_painting(self, surf):
         self.painting = surf
@@ -34,16 +39,11 @@ class Painting(object):
 
     def __getstate__(self):
         return {
-            'palette': [(c.r, c.g, c.b) for c in self.painting.get_palette()],
-            'painting': pygame.image.tostring(self.painting, 'P'),
-            'size': self.painting.get_size(),
+            'pngdata': self.pngdata
         }
 
     def __setstate__(self, state):
-        pal = [Color(*c) for c in state['palette']]
-        painting = pygame.image.fromstring(state['painting'], state['size'], 'P')
-        painting.set_palette(pal)
-        self.set_painting(painting)
+        self.set_painting(pygame.image.load(StringIO(state['pngdata'])))
 
     def get_palette(self):
         return self.palette 
