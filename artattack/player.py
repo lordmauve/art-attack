@@ -50,7 +50,10 @@ class PlayerCharacter(Actor):
     ATTACK_INTERVAL = 0.3 #seconds, how long between attacks
 
     HIT_TIME = 1.5 #seconds, how long you are stunned when hit
+    HIT_TIME_OWN_HALF = 1 #seconds, how long you are stunned when hit
+
     MAX_STUN_TIME = 5 # seconds, how long your stun can build up
+    MAX_STUN_TIME_OWN_HALF = 2 # seconds, how long your stun can build up in your own half
 
     def __init__(self, pos, player):
         self.player = player
@@ -166,8 +169,12 @@ class PlayerCharacter(Actor):
         self.sounds['hit'].play()
         if self.stun <= 0:
             self.target_pos = self.pos
+            self.stunned_in_own_half = self.in_own_half()
         self.target_pos += attack_vector * 0.6
-        self.stun = min(self.stun + self.HIT_TIME, self.MAX_STUN_TIME)
+        if self.stunned_in_own_half:
+            self.stun = min(self.stun + self.HIT_TIME_OWN_HALF, self.MAX_STUN_TIME_OWN_HALF)
+        else:
+            self.stun = min(self.stun + self.HIT_TIME, self.MAX_STUN_TIME)
         if self.tool:
             x, y = attack_vector
             self.tool.pos += (x // 20, 0)
@@ -225,7 +232,10 @@ class RedPlayerCharacter(PlayerCharacter):
         'run-left': mirror_anim('red-artist-run'),
     }
 
-    ATTACK_VECTOR = Vector([150, 0])
+    ATTACK_VECTOR = Vector([165, 0])
+
+    def in_own_half(self):
+        return self.pos.x < 512
 
 
 class BluePlayerCharacter(PlayerCharacter):
@@ -240,7 +250,10 @@ class BluePlayerCharacter(PlayerCharacter):
         'hit': anim('blue-artist-stun'),
     }
 
-    ATTACK_VECTOR = Vector([-150, 0])
+    ATTACK_VECTOR = Vector([-165, 0])
+
+    def in_own_half(self):
+        return self.pos.x >= 512
 
 
 class PlayerPalette(Loadable):
