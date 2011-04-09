@@ -110,14 +110,56 @@ class Brush(Loadable):
         self.sprites['brush'].draw(screen, (x + xoff, y + yoff))
 
 
-class GameMenu(Loadable):
+class Menu(Loadable):
+    def draw(self, screen):
+        screen.fill((255, 255, 255))
+        x, y = self.get_tl(screen)
+
+        banner = self.sprites['menu']
+        banner.draw(screen, (x, y))
+
+    def draw_brush(self, screen):
+        x, y = self.get_tl(screen)
+        self.brush.draw(screen, (x, y))
+
+    def get_tl(self, screen):
+        w, h = screen.get_size()
+
+        banner = self.sprites['menu']
+        sw, sh = banner.get_size()
+    
+        x = w // 2 - sw // 2
+        y = h // 2 - sh // 2
+        return x, y
+
+    def update(self, dt):
+        self.brush.update(dt)
+
+    def on_key(self, event):
+        if event.key == K_UP:
+            self.brush.up()
+        elif event.key == K_DOWN:
+            self.brush.down()
+        elif event.key == K_LEFT:
+            self.brush.left()
+        elif event.key == K_RIGHT:
+            self.brush.right()
+        elif event.key == K_RETURN:
+            self.do()
+
+    def do(self):
+        action = self.brush.button.name
+        getattr(self, action)()
+
+
+class GameMenu(Menu):
     SPRITES = {
         'menu': sprite('game-menu'),
         'menu-brush': sprite('menu-brush', (5, 124)),
     }
 
     def __init__(self, controller=TwoPlayerController, controller_args={}):
-        self.load()
+        GameMenu.load()
         Brush.load()
         self.controller = controller
         self.controller_args = controller_args
@@ -157,25 +199,6 @@ class GameMenu(Loadable):
 
         self.brush = Brush(start_game)
 
-    def update(self, dt):
-        self.brush.update(dt)
-
-    def on_key(self, event):
-        if event.key == K_UP:
-            self.brush.up()
-        elif event.key == K_DOWN:
-            self.brush.down()
-        elif event.key == K_LEFT:
-            self.brush.left()
-        elif event.key == K_RIGHT:
-            self.brush.right()
-        elif event.key == K_RETURN:
-            self.do()
-
-    def do(self):
-        action = self.brush.button.name
-        getattr(self, action)()
-
     def painting_left(self):
         self.selected_painting = (self.selected_painting - 1) % len(self.paintings)
         self.load_painting()
@@ -197,17 +220,8 @@ class GameMenu(Loadable):
         self.game.set_gamestate(self.controller(painting=self.get_painting(), timelimit=self.timelimit, **self.controller_args))
 
     def draw(self, screen):
-        screen.fill((255, 255, 255))
-        w, h = screen.get_size()
-
-        banner = self.sprites['menu']
-        sw, sh = banner.get_size()
-    
-        x = w // 2 - sw // 2
-        y = h // 2 - sh // 2
-
-        banner.draw(screen, (x, y))
-
+        super(GameMenu, self).draw(screen)
+        x, y = self.get_tl(screen)
         screen.blit(self.painting, (x + 300, y + 111))
 
         if self.timelimit == 0:
@@ -215,17 +229,17 @@ class GameMenu(Loadable):
         else:
             text = '%d:%02d' % (int(self.timelimit / 60), self.timelimit % 60)
         self.timelimit_label.draw(screen, text)
-        self.brush.draw(screen, (x, y))
+        self.draw_brush(screen)
 
 
-class MainMenu(GameMenu):
+class MainMenu(Menu):
     SPRITES = {
         'menu': sprite('main-menu'),
         'menu-brush': sprite('menu-brush', (5, 124)),
     }
 
     def __init__(self):
-        self.load()
+        MainMenu.load()
         Brush.load()
         self.setup_buttons()
 
@@ -255,27 +269,18 @@ class MainMenu(GameMenu):
         self.game.end()
 
     def draw(self, screen):
-        screen.fill((255, 255, 255))
-        w, h = screen.get_size()
-
-        banner = self.sprites['menu']
-        sw, sh = banner.get_size()
-    
-        x = w // 2 - sw // 2
-        y = h // 2 - sh // 2
-
-        banner.draw(screen, (x, y))
-        self.brush.draw(screen, (x, y))
+        super(MainMenu, self).draw(screen)
+        self.draw_brush(screen)
 
 
-class JoinMenu(GameMenu):
+class JoinMenu(Menu):
     SPRITES = {
         'menu': sprite('join-menu'),
         'menu-brush': sprite('menu-brush', (5, 124)),
     }
 
     def __init__(self):
-        self.load()
+        JoinMenu.load()
         Brush.load()
         self.setup_buttons()
         self.host = ''
@@ -305,23 +310,14 @@ class JoinMenu(GameMenu):
         self.game.set_gamestate(MainMenu())
 
     def draw(self, screen):
-        screen.fill((255, 255, 255))
-        w, h = screen.get_size()
-
-        banner = self.sprites['menu']
-        sw, sh = banner.get_size()
-    
-        x = w // 2 - sw // 2
-        y = h // 2 - sh // 2
-
-        banner.draw(screen, (x, y))
+        super(JoinMenu, self).draw(screen)
         self.host_label.draw(screen, self.host)
         
         lw, lh = self.host_label.text_surface.get_size()
         ax, ay = self.host_label.anchor
         pygame.draw.rect(screen, Color('white'), Rect((ax + lw, ay), (1, lh)), 0)
 
-        self.brush.draw(screen, (x, y))
+        self.draw_brush(screen)
 
     def on_key(self, event):
         super(JoinMenu, self).on_key(event)

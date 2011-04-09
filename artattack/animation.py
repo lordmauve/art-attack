@@ -34,7 +34,7 @@ class Loadable(object):
 
     @classmethod
     def load(cls):
-        if not hasattr(cls, 'sprites'):
+        if 'sprites' not in cls.__dict__:
             sprites = {}
             # TODO: load base classes' sprites and pre-populate the sprites dict
 
