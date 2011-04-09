@@ -34,22 +34,21 @@ class Loadable(object):
 
     @classmethod
     def load(cls):
-        if hasattr(cls, 'sprites'):
-            return
+        if not hasattr(cls, 'sprites'):
+            sprites = {}
+            # TODO: load base classes' sprites and pre-populate the sprites dict
 
-        sprites = {}
-        # TODO: load base classes' sprites and pre-populate the sprites dict
+            for k, load in cls.SPRITES.iteritems():
+                sprites[k] = load()
 
-        for k, load in cls.SPRITES.iteritems():
-            sprites[k] = load()
+            cls.sprites = sprites
 
-        cls.sprites = sprites
+        if not hasattr(cls, 'sounds'):
+            sounds = {}
+            for k, filename in cls.SOUNDS.iteritems():
+                sounds[k] = load_sound(filename)
 
-        sounds = {}
-        for k, filename in cls.SOUNDS.iteritems():
-            sounds[k] = load_sound(filename)
-
-        cls.sounds = sounds
+            cls.sounds = sounds
 
 
 class Sprite(object):

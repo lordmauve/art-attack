@@ -23,6 +23,10 @@ class Label(object):
         self.text = None
         self.font = self.load_font(size)
 
+    def set_colour(self, colour):
+        self.colour = Color(colour)
+        self.text = None
+
     def get_position(self):
         if self.align == Label.ALIGN_LEFT:
             return self.anchor

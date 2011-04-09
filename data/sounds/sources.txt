@@ -15,3 +15,6 @@ http://www.freesound.org/samplesViewSingle.php?id=90743o
 
 Powerup
 http://www.bfxr.net/?s=2%2C0.33%2C%2C0.13%2C1%2C0.275%2C0.3%2C0.42%2C%2C0.2649%2C0.175%2C0.14%2C0.9%2C%2C%2C%2C%2C%2C%2C%2C%2C%2C%2C%2C%2C1%2C%2C%2C0.86%2C%2C%2C%2CmasterVolume
+
+Chord
+http://www.freesound.org/samplesViewSingle.php?id=2547

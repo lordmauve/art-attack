@@ -24,8 +24,13 @@ WINNER_BLUE = 1
 NO_WINNER = -1
 
 
-class GameState(object):
+class GameState(Loadable):
+    SOUNDS = {
+        'chord': 'chord.wav',
+    }
+
     def __init__(self, painting, timelimit=120):
+        self.load()
         PaintColour.load()
         RedPlayer.load()
         BluePlayer.load()
@@ -72,8 +77,17 @@ class GameState(object):
             if event.key in keyset:
                 getattr(player, keyset[event.key])()
 
+    def time_left(self, dt, target):
+        # FIXME: this is a really perverse way of scheduling
+        return self.t > target > self.t - dt
+
     def update(self, dt):
         if self.timelimit:
+            if self.time_left(dt, 10):
+                self.time_label.set_colour('#ff3333')
+            if self.t < 11:
+                if int(self.t) - int(self.t - dt):
+                    self.sounds['chord'].play()
             self.t -= dt
             if self.t <= 0:
                 self.t = 0
