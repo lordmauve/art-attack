@@ -242,9 +242,12 @@ class NetworkController(GameStateController):
         world = self.g.world
         pos = ArtworkPosition.from_net(pos, world)
         tool = tool_class(world, pos)
-        tool.paint(colour)
+
+        pc = world.players[playerid].pc
+        tool.paint(colour, sound=not pc.is_painting())
+        pc.paint()
     
-        world.players[playerid].pc.paint()
+        
 
         #TODO: server should sync back the pixels under the tool
         # to eliminate race conditions with one player overpainting the other
