@@ -17,6 +17,7 @@ from .player import *
 from .tools import *
 from .world import World
 from .keybindings import get_keybindings
+from .powerups import PowerupFactory
 
 WINNER_RED = 0
 WINNER_BLUE = 1
@@ -29,6 +30,7 @@ class GameState(object):
         RedPlayer.load()
         BluePlayer.load()
         Brush.load()
+        PowerupFactory.load_all()
 
         self.world = World.for_painting(painting)
         self.world.give_colour()

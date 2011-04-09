@@ -89,10 +89,19 @@ class PowerupFactory(object):
         for side, drop_time in enumerate(self.nextdrop):
             if self.t > drop_time: 
                 self.drop(side)
+
+    @classmethod
+    def load_all(cls):
+        for powerup in cls.POWERUPS:
+            powerup.load()
         
 
 class PaintCan(Powerup):
     COLOUR = True
+
+    SOUNDS = {
+        'powerup': 'powerup.wav',
+    }
 
     def __init__(self, pos, colour):
         super(PaintCan, self).__init__(pos)
@@ -104,6 +113,7 @@ class PaintCan(Powerup):
         pass
     
     def pickup(self, player):
+        self.sounds['powerup'].play()
         player.palette.add_colour(self.colour)
 
 
