@@ -199,8 +199,8 @@ class RedPlayerCharacter(PlayerCharacter):
         'standing-left': anim('red-artist-standing-left'),
         'standing-centre': anim('red-artist-standing-centre'),
         'standing-right': anim('red-artist-standing-right'),
-        'standing-attack': sprite('red-artist-standing-attack', (-27, -100)),
-        'hit': sprite('red-artist-hit', (-67, -123)),
+        'standing-attack': anim('red-artist-attack'),
+        'hit': anim('red-artist-stun'),
         'run-right': anim('red-artist-run'),
         'run-left': mirror_anim('red-artist-run'),
     }
@@ -216,8 +216,8 @@ class BluePlayerCharacter(PlayerCharacter):
         'standing-left': anim('blue-artist-standing-left'),
         'standing-centre': anim('blue-artist-standing-centre'),
         'standing-right': anim('blue-artist-standing-right'),
-        'standing-attack': sprite('blue-artist-standing-attack', (-154, -100)),
-        'hit': sprite('blue-artist-hit', (-57, -152)),
+        'standing-attack': anim('blue-artist-attack'),
+        'hit': anim('blue-artist-stun'),
     }
 
     ATTACK_VECTOR = Vector([-150, 0])

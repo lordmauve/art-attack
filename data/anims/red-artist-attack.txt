@@ -1,0 +1,9 @@
+base: red-artist-standing-attack
+frames: 1
+offsets: -27,-100
+
+base: paint-attack-right
+colour: true
+frames: 1
+offsets: 129,-63
+

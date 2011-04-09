@@ -1,0 +1,9 @@
+base: red-artist-hit
+frames: 1
+offsets: -67,-123
+
+base: paint-stun-right
+colour: true
+frames: 1
+offsets: 29,-8
+
