@@ -115,10 +115,11 @@ class GameMenu(Loadable):
         'menu-brush': sprite('menu-brush', (5, 124)),
     }
 
-    def __init__(self, controller=TwoPlayerController):
+    def __init__(self, controller=TwoPlayerController, controller_args={}):
         self.load()
         Brush.load()
         self.controller = controller
+        self.controller_args = controller_args
         self.setup_buttons()
         self.timelimit = 180
         self.timelimit_label = Label((730, 310), align=Label.ALIGN_RIGHT, size=30)
@@ -192,7 +193,7 @@ class GameMenu(Loadable):
         self.game.end()
 
     def start_game(self):
-        self.game.set_gamestate(self.controller(painting=self.get_painting(), timelimit=self.timelimit))
+        self.game.set_gamestate(self.controller(painting=self.get_painting(), timelimit=self.timelimit, **self.controller_args))
 
     def draw(self, screen):
         screen.fill((255, 255, 255))

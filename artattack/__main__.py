@@ -11,6 +11,7 @@ from pygame.locals import *
 from .data import screenshot_path
 from .game import TwoPlayerController, HostController, ClientController
 from .text import Label
+from .menu import GameMenu
 
 
 DEFAULT_PAINTING = 'desert-island2.png'
@@ -60,7 +61,6 @@ class Game(object):
 
 
 def menu():
-    from .menu import GameMenu
     game = Game()
     game.set_gamestate(GameMenu())
     game.run()
@@ -74,13 +74,12 @@ def main(painting=DEFAULT_PAINTING, timelimit=120):
     pygame.quit()
 
 
-def host(painting=DEFAULT_PAINTING, timelimit=120, port=None):
+def host(port=None):
     game = Game()
+    kwargs = {}
     if port is not None:
-        gs = HostController(painting, timelimit=timelimit, port=port)
-    else:
-        gs = HostController(painting, timelimit=timelimit)
-    game.set_gamestate(gs)
+        kwargs['port'] = port
+    game.set_gamestate(GameMenu(controller=HostController))
     game.run()
     pygame.quit()
 
