@@ -72,13 +72,16 @@ class PlayerCharacter(Actor):
         self.sprite_colour = colour
         self.sprite_instance = self.sprites[self.sprite].create_instance(colour=colour)
 
-    def track_brush(self, pos):
-        """Update the position of the brush (in floor space)."""
-        self.brush_pos = pos
+    def track_tool(self, tool):
+        """Specify a tool for the PC to track"""
+        self.tool = tool
+
+    def stop_tracking(self):
+        self.tool = None
 
     def update(self, dt):
         from .world import screen_to_floor, FORESHORTENING
-        if self.brush_pos is None:
+        if self.tool is None:
             return
 
         if self.attacking > 0:
@@ -87,7 +90,7 @@ class PlayerCharacter(Actor):
             self.hit -= dt
     
         bx, by = self.brush_offsets[self.dir]
-        t = self.brush_pos - Vector([bx, by * FORESHORTENING])
+        t = self.tool.pos.floor_pos() - Vector([bx, by * FORESHORTENING])
 
         v = (t - self.pos)
         
@@ -155,10 +158,9 @@ class PlayerCharacter(Actor):
         self.sounds['hit'].play()
         self.hit = self.HIT_TIME
         self.pos += attack_vector
-        if self.player.tool:
+        if self.tool:
             x, y = attack_vector
-            self.player.tool.pos += (x // 30, 0)
-            self.track_brush(self.player.tool.pos.floor_pos())
+            self.tool.pos += (x // 30, 0)
 
     def paint(self):
         self.painting = 0.1
@@ -178,14 +180,14 @@ class PlayerCharacter(Actor):
             pass
 
     @classmethod
-    def for_brush_pos(cls, brush_pos, player):
+    def for_tool(cls, tool, player):
         """Create an instance of a PlayerCharacter based on the position of the corresponding tool.""" 
         from .world import screen_to_floor, FORESHORTENING
         bx, by = cls.brush_offsets[cls.DEFAULT_DIR]
         off = Vector([bx, by * FORESHORTENING])
-        floor_pos = brush_pos.floor_pos() - off
+        floor_pos = tool.pos.floor_pos() - off
         inst = cls(floor_pos, player)
-        inst.track_brush(brush_pos.floor_pos())
+        inst.track_tool(tool)
         return inst
 
 
@@ -327,13 +329,23 @@ class Player(object):
         self.palette = self.PALETTE_CLASS()
         self.world = world
         self.artwork = artwork
-
-        self.pc = self.CHARACTER.for_brush_pos(start_pos, self)
-
         self.tool = None
-        self.set_tool(Brush(self, start_pos))
+
+        tool = Brush(self, start_pos)
+        self.pc = self.CHARACTER.for_tool(tool, self)
+        self.set_tool(tool)
 
         self.create_labels()
+
+        self.on_tool_move = Signal()
+        self.on_palette_change = Signal()
+        self.on_paint = Signal()
+        self.on_attack = Signal()
+
+        self.palette.on_change.connect(self.handle_palette_change)
+
+    def handle_palette_change(self, palette):
+        self.on_palette_change.fire(self, palette)
 
     def create_labels(self):
         """Create the labels for the player's score"""
@@ -346,6 +358,7 @@ class Player(object):
         if self.tool:
             tool.pos = self.tool.pos
         self.tool = tool
+        self.pc.track_tool(tool)
 
     def draw(self, screen):
         self.palette.draw(screen)
@@ -364,26 +377,31 @@ class Player(object):
             self.tool.paint(colour)
             self.pc.paint()
             self.palette.switch()
+            self.on_paint.fire(self, self.tool)
 
     def up(self):
         if self.tool:
             self.tool.move_up()
-            self.pc.track_brush(self.tool.pos.floor_pos())
+            self.on_tool_move.fire(self, self.tool.pos)
 
     def down(self):
         if self.tool:
             self.tool.move_down()
-            self.pc.track_brush(self.tool.pos.floor_pos())
+            self.on_tool_move.fire(self, self.tool.pos)
 
     def left(self):
         if self.tool:
             self.tool.move_left()
-            self.pc.track_brush(self.tool.pos.floor_pos())
+            self.on_tool_move.fire(self, self.tool.pos)
 
     def right(self):
         if self.tool:
             self.tool.move_right()
-            self.pc.track_brush(self.tool.pos.floor_pos())
+            self.on_tool_move.fire(self, self.tool.pos)
+        
+    def set_tool_position(self, pos):
+        if self.tool:
+            self.tool.pos = pos
 
     def attack(self):
         self.pc.attack()
@@ -407,6 +425,7 @@ class RedPlayer(Player):
     COLOUR = Color('#880000')
     PALETTE_CLASS = PlayerPaletteLeft
     CHARACTER = RedPlayerCharacter
+    ID = 0
 
     def create_labels(self):
         self.percent_label = Label((15, 135))
@@ -419,6 +438,7 @@ class BluePlayer(Player):
     COLOUR = Color('#3333AA')
     PALETTE_CLASS = PlayerPaletteRight
     CHARACTER = BluePlayerCharacter
+    ID = 1
 
     def create_labels(self):
         self.percent_label = Label((1009, 135), align=Label.ALIGN_RIGHT)

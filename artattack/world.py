@@ -139,10 +139,10 @@ class ArtworkPosition(object):
         return ArtworkPosition(world, artwork, w // 2, h // 2)
 
     def to_net(self):
-        return (self.artwork, x, y)
+        return (self.artwork, self.x, self.y)
 
     @staticmethod
-    def from_net(self, net, world):
+    def from_net(net, world):
         return ArtworkPosition(world, *net)
 
 

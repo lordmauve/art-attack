@@ -129,5 +129,14 @@ class PaintCan(Powerup):
         self.sounds['powerup'].play()
         player.palette.add_colour(self.colour)
 
+    def to_net(self):
+        return (self.pos, self.colour.index)
+
+    @classmethod
+    def from_net(cls, net, palette_map):
+        pos, index = net
+        return cls(pos, palette_map[index])
+
+
 
 PowerupFactory.register(PaintCan)

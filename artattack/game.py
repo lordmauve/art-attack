@@ -15,7 +15,7 @@ from .paint import PaintColour
 from .artwork import *
 from .player import *
 from .tools import *
-from .world import World
+from .world import World, ArtworkPosition
 from .keybindings import get_keybindings
 from .powerups import PowerupFactory
 from .signals import Signal
@@ -174,22 +174,47 @@ class NetworkController(GameStateController):
             except Empty:
                 break
 
-            print op, payload
+#            print op, payload
             try:
                 handler = self.HANDLERS[op]
             except KeyError:
-                print "%s: unhandled opcode %d" % (self.__class__.__name__, op)
+                print "%s: unhandled opcode %d, payload %r" % (self.__class__.__name__, op, payload)
                 continue
 
             getattr(self, handler)(payload)
+
+    # Common handlers
+
+    def on_tool_move(self, player, pos):
+        self.net.send_message(OP_TOOL_MOVE, (player.ID, pos.to_net()))
+
+    def handle_tool_move(self, player_pos):
+        world = self.g.world
+        playerid, pos = player_pos
+        pos = ArtworkPosition.from_net(pos, self.g.world)
+        world.players[playerid].set_tool_position(pos)
+
+    def on_palette_change(self, player, palette):
+        self.net.send_message(OP_PALETTE_CHANGE, (player.ID, palette.to_net()))
+
+    def handle_palette_change(self, player_palette):
+        playerid, palette = player_palette
+        world = self.g.world
+        world.players[playerid].palette.from_net(palette, world.painting.get_palette_map())
+
+    def handle_network_error(self, errorstr):
+        self.set_status(errorstr)
+        self.started = False
 
 
 class HostController(NetworkController):
     # A mapping of operation to handler
     HANDLERS = {
+        OP_ERR: 'handle_network_error',
         OP_CONNECT: 'on_connect',
         OP_START: 'send_start',
         OP_PALETTE_CHANGE: 'handle_palette_change',
+        OP_TOOL_MOVE: 'handle_tool_move',
     }
 
     def __init__(self, painting, timelimit=120, port=DEFAULT_PORT):
@@ -203,16 +228,11 @@ class HostController(NetworkController):
     def connect_game_signals(self):
         world = self.g.world
         world.on_powerup_spawn.connect(self.on_powerup_spawn)
-        world.red_player.palette.on_change.connect(self.on_palette_change_red)
+        world.red_player.on_palette_change.connect(self.on_palette_change)
+        world.red_player.on_tool_move.connect(self.on_tool_move)
 
     def on_powerup_spawn(self, powerup):
-        self.net.send_message(OP_POWERUP_SPAWN, powerup)
-
-    def on_palette_change_red(self, palette):
-        self.net.send_message(OP_PALETTE_CHANGE, (0, palette.to_net()))
-
-    def handle_palette_change(self, palette):
-        world.red_player.palette.from_net(palette, self.world.painting.get_palette_map())
+        self.net.send_message(OP_POWERUP_SPAWN, (powerup.__class__, powerup.to_net()))
 
     def on_connect(self, remote_addr):
         self.set_status("Client connected.")
@@ -250,6 +270,8 @@ class ClientController(NetworkController):
         OP_ERR: 'handle_network_error',
         OP_START: 'handle_start',
         OP_PALETTE_CHANGE: 'handle_palette_change',
+        OP_POWERUP_SPAWN: 'handle_powerup_spawn',
+        OP_TOOL_MOVE: 'handle_tool_move',
     }
 
     def __init__(self, host, port=DEFAULT_PORT):
@@ -263,9 +285,6 @@ class ClientController(NetworkController):
     def handle_start(self, arg):
         self.started = True
         self.start_game()
-
-    def handle_network_error(self, errorstr):
-        self.set_status(errorstr)
 
     def configure_game(self, configdict):
         self.gs = self.g
@@ -282,18 +301,14 @@ class ClientController(NetworkController):
 
     def connect_game_signals(self):
         world = self.g.world
-        world.blue_player.palette.on_change.connect(self.on_palette_change_blue)
+        world.blue_player.on_palette_change.connect(self.on_palette_change)
+        world.blue_player.on_tool_move.connect(self.on_tool_move)
 
-    def on_palette_change_blue(self, palette):
-        self.net.send_message(OP_PALETTE_CHANGE, (1, palette.to_net()))
-
-    def handle_palette_change(self, palette):
-        player, palette = palette
+    def handle_powerup_spawn(self, powerup):
         world = self.g.world
-        if player == 1:
-            world.blue_player.palette.from_net(palette, world.painting.get_palette_map())
-        elif player == 0:
-            world.red_player.palette.from_net(palette, world.painting.get_palette_map())
+        cls, net = powerup
+        inst = cls.from_net(net, world.painting.get_palette_map())
+        world.spawn_powerup(inst)
 
     def on_key(self, event):
         if not hasattr(self.gs, 'world'):

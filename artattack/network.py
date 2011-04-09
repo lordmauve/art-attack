@@ -17,6 +17,7 @@ OP_GAMECONFIG = 3    # Server sends painting and time limit
 OP_GIVE_COLOUR = 4  # Give colour, at the start of the game
 OP_POWERUP_SPAWN = 5 # Powerup spawned
 OP_PALETTE_CHANGE = 6  # Palette changed (order/colours etc)
+OP_TOOL_MOVE = 7 # Player tool moved
 
 DEFAULT_PORT = 9067
 
@@ -46,6 +47,7 @@ class BaseConnection(Thread):
         except socket.error, e:
             self.receive_queue.put((OP_ERR, e.strerror))
             self.disconnect()
+            return
 
         self.read_buf += b
         while len(self.read_buf) > 4:
