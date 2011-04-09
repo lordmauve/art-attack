@@ -92,9 +92,9 @@ class PowerupFactory(object):
 
         if powerup_class.COLOUR:
             colour = self.world.get_random_colour()
-            self.world.spawn(powerup_class(pos, colour))
+            self.world.spawn_powerup(powerup_class(pos, colour))
         else:
-            self.world.spawn(powerup_class(pos))
+            self.world.spawn_powerup(powerup_class(pos))
         self.schedule_drop(side)
 
     def update(self, dt):

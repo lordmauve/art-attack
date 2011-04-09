@@ -1,6 +1,6 @@
 import time
 import struct
-from cPickle import loads, dumps
+from cPickle import loads, dumps, PicklingError, UnpicklingError
 import socket
 
 from threading import Thread
@@ -15,6 +15,8 @@ OP_START = 1    # Client/server ready, commence game
 OP_NAME = 2    # My name is
 OP_GAMECONFIG = 3    # Server sends painting and time limit
 OP_GIVE_COLOUR = 4  # Give colour, at the start of the game
+OP_POWERUP_SPAWN = 5 # Powerup spawned
+OP_PALETTE_CHANGE = 6  # Palette changed (order/colours etc)
 
 DEFAULT_PORT = 9067
 
@@ -29,16 +31,22 @@ class BaseConnection(Thread):
         self.daemon = True
 
     def send_message(self, op, payload):
-        self.send_queue.put((op, payload))
+        buf = dumps((op, payload), -1)
+        self.send_queue.put(buf)
 
     def receive_message(self):
         return self.receive_queue.get_nowait()
 
-    def stop(self):
+    def disconnect(self):
         self.keeprunning = False
 
     def _read_socket(self):
-        b = self.socket.recv(4096)
+        try:
+            b = self.socket.recv(4096)
+        except socket.error, e:
+            self.receive_queue.put((OP_ERR, e.strerror))
+            self.disconnect()
+
         self.read_buf += b
         while len(self.read_buf) > 4:
             size = struct.unpack('!I', b[:4])[0]
@@ -54,11 +62,10 @@ class BaseConnection(Thread):
 
     def _write_socket(self):
         try:
-            payload = self.send_queue.get_nowait()
+            buf = self.send_queue.get_nowait()
         except Empty:
             return
 
-        buf = dumps(payload, -1)
         size = struct.pack('!I', len(buf))
 
 #        print "Sending", len(size) + len(buf), "bytes"
@@ -89,12 +96,12 @@ class BaseConnection(Thread):
 
             if rlist:
                 self._read_socket()
-
-            if wlist:
+            elif wlist:
                 self._write_socket()
-
-            if xlist:
+            elif xlist:
                 pass
+
+        self.socket.close()
 
 
 

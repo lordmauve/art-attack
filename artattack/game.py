@@ -189,13 +189,30 @@ class HostController(NetworkController):
     HANDLERS = {
         OP_CONNECT: 'on_connect',
         OP_START: 'send_start',
+        OP_PALETTE_CHANGE: 'handle_palette_change',
     }
+
     def __init__(self, painting, timelimit=120, port=DEFAULT_PORT):
         super(HostController, self).__init__(painting, timelimit)
         self.net = ServerSocket(port)
         self.net.start()
         self.status_label = Label((768, 565), align=Label.ALIGN_CENTRE, size=16)
         self.status = 'Waiting for connection...'
+        self.connect_game_signals()
+
+    def connect_game_signals(self):
+        world = self.g.world
+        world.on_powerup_spawn.connect(self.on_powerup_spawn)
+        world.red_player.palette.on_change.connect(self.on_palette_change_red)
+
+    def on_powerup_spawn(self, powerup):
+        self.net.send_message(OP_POWERUP_SPAWN, powerup)
+
+    def on_palette_change_red(self, palette):
+        self.net.send_message(OP_PALETTE_CHANGE, (0, palette.to_net()))
+
+    def handle_palette_change(self, palette):
+        world.red_player.palette.from_net(palette, self.world.painting.get_palette_map())
 
     def on_connect(self, remote_addr):
         self.set_status("Client connected.")
@@ -213,10 +230,17 @@ class HostController(NetworkController):
                     getattr(player, keyset[event.key])()
 
     def send_gameconfig(self):
-        self.net.send_message(OP_GAMECONFIG, {'timelimit': self.g.timelimit, 'painting': self.g.world.painting}) 
+        world = self.g.world
+        self.net.send_message(OP_GAMECONFIG, {
+            'timelimit': self.g.timelimit,
+            'painting': world.painting,
+            'red_palette': world.red_player.palette.to_net(),
+            'blue_palette': world.blue_player.palette.to_net(),
+        }) 
 
     def send_start(self, ready):
         self.started = True
+        world = self.g.world
         self.net.send_message(OP_START, None)
 
 
@@ -225,6 +249,7 @@ class ClientController(NetworkController):
         OP_GAMECONFIG: 'configure_game',
         OP_ERR: 'handle_network_error',
         OP_START: 'handle_start',
+        OP_PALETTE_CHANGE: 'handle_palette_change',
     }
 
     def __init__(self, host, port=DEFAULT_PORT):
@@ -245,9 +270,30 @@ class ClientController(NetworkController):
     def configure_game(self, configdict):
         self.gs = self.g
         self.g.set_timelimit(configdict['timelimit'])
-        world = World(configdict['painting'])
+        world = World(configdict['painting'], powerups=False)
         self.gs.world = world
+
+        self.handle_palette_change((0, configdict['red_palette']))
+        self.handle_palette_change((1, configdict['blue_palette']))
+
+        self.connect_game_signals()
+
         self.net.send_message(OP_START, None)
+
+    def connect_game_signals(self):
+        world = self.g.world
+        world.blue_player.palette.on_change.connect(self.on_palette_change_blue)
+
+    def on_palette_change_blue(self, palette):
+        self.net.send_message(OP_PALETTE_CHANGE, (1, palette.to_net()))
+
+    def handle_palette_change(self, palette):
+        player, palette = palette
+        world = self.g.world
+        if player == 1:
+            world.blue_player.palette.from_net(palette, world.painting.get_palette_map())
+        elif player == 0:
+            world.red_player.palette.from_net(palette, world.painting.get_palette_map())
 
     def on_key(self, event):
         if not hasattr(self.gs, 'world'):

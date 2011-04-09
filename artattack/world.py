@@ -16,6 +16,7 @@ from .artwork import *
 
 from .data import filepath
 from .animation import Loadable
+from .signals import Signal
 
 from vector import Vector
 
@@ -137,6 +138,13 @@ class ArtworkPosition(object):
 
         return ArtworkPosition(world, artwork, w // 2, h // 2)
 
+    def to_net(self):
+        return (self.artwork, x, y)
+
+    @staticmethod
+    def from_net(self, net, world):
+        return ArtworkPosition(world, *net)
+
 
 ARTWORK_SIZE = (360, 240)
 RECT_RED = Rect((79, 310), ARTWORK_SIZE)
@@ -173,7 +181,7 @@ class World(object):
     FORESHORTENING * pixels in the y direction, measured from the back wall.
 
     """
-    def __init__(self, painting):
+    def __init__(self, painting, powerups=True):
         from .powerups import PowerupFactory
         from .player import RedPlayer, BluePlayer
         self.painting = painting
@@ -201,7 +209,12 @@ class World(object):
         for p in self.players:
             self.spawn(p.pc)
 
-        self.powerup_factory = PowerupFactory(self)
+        if powerups:
+            self.powerup_factory = PowerupFactory(self)
+        else:
+            self.powerup_factory = False
+
+        self.on_powerup_spawn = Signal()
 
     def spawn(self, actor):
         actor.world = self
@@ -211,6 +224,10 @@ class World(object):
     def kill(self, actor):
         actor.alive = False
         self.actors.remove(actor)
+
+    def spawn_powerup(self, powerup):
+        self.on_powerup_spawn.fire(powerup)
+        self.spawn(powerup)
 
     def get_floor_space(self):
         """Compute the top left and bottom right floor positions of the space"""
@@ -233,8 +250,9 @@ class World(object):
             player.palette.colours = palette[:]
 
     def drop_powerups(self):
-        for side in range(2):
-            self.powerup_factory.drop(side)
+        if self.powerup_factory:
+            for side in range(2):
+                self.powerup_factory.drop(side)
 
     def update(self, dt):
         for p in self.players:
@@ -245,7 +263,8 @@ class World(object):
 
         self.handle_collisions()
 
-        self.powerup_factory.update(dt)
+        if self.powerup_factory:
+            self.powerup_factory.update(dt)
 
     def handle_collisions(self):
         """Brute force collision detection with O(n^2) time complexity.

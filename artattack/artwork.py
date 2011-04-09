@@ -48,6 +48,12 @@ class Painting(object):
     def get_palette(self):
         return self.palette 
 
+    def get_palette_map(self):
+        m = {}
+        for c in self.palette:
+            m[c.index] = c
+        return m
+
     def build_outline_surface(self, sw, sh):
         """Generate partially transparent guidelines to show where players should paint.
         """

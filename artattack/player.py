@@ -12,6 +12,7 @@ from .tools import Brush
 from .text import Label
 from .animation import Loadable, sprite, anim, mirror_anim
 
+from .signals import Signal
 
 class PlayerCharacter(Actor):
     """The player's avatar.
@@ -239,6 +240,8 @@ class PlayerPalette(Loadable):
         self.selected = None
         self.change_time = 0
 
+        self.on_change = Signal()
+
     def get_selected(self):
         if self.selected is None:
             return None
@@ -247,12 +250,24 @@ class PlayerPalette(Loadable):
     def next(self):
         self.selected = (self.selected + 1) % len(self.colours)
         self.change_time = 1
+        self.on_change.fire(self)
 
     def update(self, dt):
         if self.change_time > 0:
             self.change_time -= dt
             if self.change_time <= 0:
                 self.switch()
+
+    def to_net(self):
+        return (self.selected, [c.index for c in self.colours])
+
+    def from_net(self, net, palette_map):
+        selected, colours = net
+        cs = []
+        self.selected = selected
+        for c in colours:
+            cs.append(palette_map[c])
+        self.colours = cs
 
     def switch(self):
         """Switch the order of the palette so that the currently selected colour is first.
@@ -265,6 +280,8 @@ class PlayerPalette(Loadable):
         self.colours.insert(0, c)
         self.selected = 0
 
+        self.on_change.fire(self)
+
     def add_colour(self, colour):
         """If the palette doesn't contain it, add the colour to the palette.
         
@@ -275,6 +292,8 @@ class PlayerPalette(Loadable):
             return
         self.colours = [colour] + self.colours[:self.MAX_COLOURS - 1]
         self.selected = 0
+
+        self.on_change.fire(self)
 
     def draw(self, screen):
         xoff, yoff = self.DISPLAY_POS
