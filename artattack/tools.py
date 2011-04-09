@@ -64,7 +64,7 @@ class Brush(Loadable):
     def move_down(self):
         self.pos += (0, 1)
 
-    def paint(self, colour):
+    def paint(self, colour, sound=True):
         tl = self.topleft()
         br = self.bottomright()
         left, top = tl 
@@ -73,7 +73,8 @@ class Brush(Loadable):
         for j in range(top, bottom + 1):
             for i in range(left, right + 1):
                 artwork.paint_pixel((i, j), colour)
-        self.play_sound()
+        if sound:
+            self.play_sound()
 
     def play_sound(self):
         sound = random.choice(self.sounds.values())

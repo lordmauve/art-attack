@@ -110,14 +110,11 @@ class PlayerCharacter(Actor):
         if -37 <= v.x <= 47:
             v = self.alter_v_for_collision(Vector([0, max(-self.MAX_SPEED * dt, min(self.MAX_SPEED * dt, v.y))]))
             self.pos += v
-            if abs(v.y) > 1:
-                self.painting = 0
         else:
             if v.length > self.MAX_SPEED * dt:
                 v = v.scaled_to(self.MAX_SPEED * dt)
             v = self.alter_v_for_collision(v)
             self.pos += v
-            self.painting = 0
 
         if self.painting > 0:
             self.painting -= dt
@@ -126,7 +123,7 @@ class PlayerCharacter(Actor):
             sprite = 'hit'
         elif self.attacking > self.ATTACK_INTERVAL:
             sprite = 'standing-attack'
-        elif self.painting > 0:
+        elif self.is_painting():
             sprite = 'painting-%s' % self.dir
         else:
             sprite = 'standing-%s' % self.dir
@@ -163,7 +160,10 @@ class PlayerCharacter(Actor):
             self.tool.pos += (x // 30, 0)
 
     def paint(self):
-        self.painting = 0.1
+        self.painting = 0.3
+
+    def is_painting(self):
+        return self.painting > 0
 
     def alter_v_for_collision(self, v):
         if (self.pos + v).distance_to(self.other_player.pos) > 20:
@@ -374,7 +374,7 @@ class Player(object):
     def paint(self):
         if self.tool:
             colour = self.palette.get_selected().index
-            self.tool.paint(colour)
+            self.tool.paint(colour, sound=not self.pc.is_painting())
             self.pc.paint()
             self.palette.switch()
             self.on_paint.fire(self, self.tool, colour)
