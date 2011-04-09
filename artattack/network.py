@@ -35,6 +35,7 @@ class BaseConnection(Thread):
 
         self.keeprunning = True
         self.daemon = True
+        self.socket = None
 
     def send_message(self, op, payload):
         buf = dumps((op, payload), -1)
@@ -116,7 +117,8 @@ class BaseConnection(Thread):
                 self.receive_queue.put((OP_ERR, "Networking crashed :("))
                 break
 
-        self.socket.close()
+        if self.socket:
+            self.socket.close()
 
 
 
@@ -127,9 +129,14 @@ class ServerSocket(BaseConnection):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.bind(('0.0.0.0', port))
         self.server_socket.listen(1)
+        self.server_socket.setblocking(0)
+        self.socket = None
 
     def wait_for_connection(self):
-        r = self.server_socket.accept()
+        try:
+            r = self.server_socket.accept()
+        except socket.error:
+            return False
         if r:
             conn, address = r
 
@@ -146,7 +153,8 @@ class ServerSocket(BaseConnection):
             if self.wait_for_connection():
                 break
             time.sleep(1)
-        self.on_connection_receive()
+        if self.socket:
+            self.on_connection_receive()
 
 
 class ClientSocket(BaseConnection):
