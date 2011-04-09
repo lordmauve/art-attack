@@ -1,6 +1,7 @@
 import os
 import math
 
+import re
 import pygame
 from pygame.locals import *
 
@@ -8,7 +9,7 @@ from pygame.locals import *
 from .artwork import Painting
 from .data import filepath
 from .animation import Loadable, sprite
-from .game import TwoPlayerController
+from .game import TwoPlayerController, HostController, ClientController
 from .text import Label
 
 
@@ -190,7 +191,7 @@ class GameMenu(Loadable):
         self.timelimit = max(0, self.timelimit - 30)
 
     def back(self):
-        self.game.end()
+        self.game.set_gamestate(MainMenu())
 
     def start_game(self):
         self.game.set_gamestate(self.controller(painting=self.get_painting(), timelimit=self.timelimit, **self.controller_args))
@@ -215,3 +216,117 @@ class GameMenu(Loadable):
             text = '%d:%02d' % (int(self.timelimit / 60), self.timelimit % 60)
         self.timelimit_label.draw(screen, text)
         self.brush.draw(screen, (x, y))
+
+
+class MainMenu(GameMenu):
+    SPRITES = {
+        'menu': sprite('main-menu'),
+        'menu-brush': sprite('menu-brush', (5, 124)),
+    }
+
+    def __init__(self):
+        self.load()
+        Brush.load()
+        self.setup_buttons()
+
+    def setup_buttons(self):
+        local_game = Button('local_game', (512, 158)) 
+        host_game = Button('host_game', (567, 238)) 
+        join_game = Button('join_game', (519, 315)) 
+        exit = Button('exit', (371, 391))
+
+        local_game.above(host_game)
+        host_game.above(join_game)
+        join_game.above(exit)
+        local_game.below(exit)
+
+        self.brush = Brush(local_game)
+
+    def local_game(self):
+        self.game.set_gamestate(GameMenu())
+
+    def host_game(self):
+        self.game.set_gamestate(GameMenu(controller=HostController))
+
+    def join_game(self):
+        self.game.set_gamestate(JoinMenu())
+
+    def exit(self):
+        self.game.end()
+
+    def draw(self, screen):
+        screen.fill((255, 255, 255))
+        w, h = screen.get_size()
+
+        banner = self.sprites['menu']
+        sw, sh = banner.get_size()
+    
+        x = w // 2 - sw // 2
+        y = h // 2 - sh // 2
+
+        banner.draw(screen, (x, y))
+        self.brush.draw(screen, (x, y))
+
+
+class JoinMenu(GameMenu):
+    SPRITES = {
+        'menu': sprite('join-menu'),
+        'menu-brush': sprite('menu-brush', (5, 124)),
+    }
+
+    def __init__(self):
+        self.load()
+        Brush.load()
+        self.setup_buttons()
+        self.host = ''
+
+        sw, sh = self.sprites['menu'].get_size()
+    
+        x = 512 - sw // 2
+        y = 300 - sh // 2
+        self.host_label = Label((x + 236, y + 210), align=Label.ALIGN_LEFT, size=30)
+
+    def setup_buttons(self):
+        start_game = Button('start_game', (512, 331))
+        back = Button('back', (359, 400))
+#        hostname = Button('hostname', (572, 226))
+    
+#        hostname.above(start_game)
+        start_game.above(back)
+        start_game.below(back)
+#        back.above(hostname)
+
+        self.brush = Brush(start_game)
+
+    def start_game(self):
+        self.game.set_gamestate(ClientController(host=self.host))
+
+    def back(self):
+        self.game.set_gamestate(MainMenu())
+
+    def draw(self, screen):
+        screen.fill((255, 255, 255))
+        w, h = screen.get_size()
+
+        banner = self.sprites['menu']
+        sw, sh = banner.get_size()
+    
+        x = w // 2 - sw // 2
+        y = h // 2 - sh // 2
+
+        banner.draw(screen, (x, y))
+        self.host_label.draw(screen, self.host)
+        
+        lw, lh = self.host_label.text_surface.get_size()
+        ax, ay = self.host_label.anchor
+        pygame.draw.rect(screen, Color('white'), Rect((ax + lw, ay), (1, lh)), 0)
+
+        self.brush.draw(screen, (x, y))
+
+    def on_key(self, event):
+        super(JoinMenu, self).on_key(event)
+
+        if event.unicode and re.match(r'^[A-Za-z0-9.-]$', event.unicode):
+            self.host += str(event.unicode)
+        elif event.key == K_BACKSPACE:
+            self.host = self.host[:-1]

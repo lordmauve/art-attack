@@ -11,7 +11,7 @@ from pygame.locals import *
 from .data import screenshot_path
 from .game import TwoPlayerController, HostController, ClientController
 from .text import Label
-from .menu import GameMenu
+from .menu import MainMenu
 
 
 DEFAULT_PAINTING = 'desert-island2.png'
@@ -29,6 +29,11 @@ class Game(object):
         self.gamestate = None
 
     def set_gamestate(self, gamestate):
+        if self.gamestate:
+            try:
+                self.gamestate.net.disconnect()
+            except AttributeError:
+                pass
         gamestate.game = self
         self.gamestate = gamestate
 
@@ -46,7 +51,9 @@ class Game(object):
                     return
                 elif event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
-                        return
+                        if isinstance(self.gamestate, MainMenu):
+                            return
+                        self.set_gamestate(MainMenu())
                     elif event.key == K_F12:
                         self.save_screenshot()
                     self.gamestate.on_key(event)
@@ -62,7 +69,7 @@ class Game(object):
 
 def menu():
     game = Game()
-    game.set_gamestate(GameMenu())
+    game.set_gamestate(MainMenu())
     game.run()
     pygame.quit()
 

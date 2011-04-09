@@ -33,6 +33,7 @@ class BaseConnection(Thread):
         self.receive_queue = Queue()
         self.read_buf = ''
 
+        self.keeprunning = True
         self.daemon = True
 
     def send_message(self, op, payload):
@@ -44,6 +45,10 @@ class BaseConnection(Thread):
 
     def disconnect(self):
         self.keeprunning = False
+        try:
+            self.join()
+        except RuntimeError:
+            pass
 
     def _read_socket(self):
         try:
@@ -87,7 +92,6 @@ class BaseConnection(Thread):
         raise NotImplementedError("Implement this")
 
     def run(self):
-        self.keeprunning = True
         try:
             self.establish_connection()
         except socket.error, e:

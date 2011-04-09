@@ -115,7 +115,8 @@ class GameStateController(object):
         pass
     
     def on_gameover_finish(self):
-        self.game.end()
+        from .menu import MainMenu
+        self.game.set_gamestate(MainMenu())
 
     def on_countdown_finish(self):
         self.gs = self.gs.gamestate 
