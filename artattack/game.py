@@ -114,6 +114,17 @@ class StartGameState(BannerGameState):
         'paint': sprite('game-paint'),
     }
 
+    SOUNDS = {
+        'ready': 'ready.wav',
+        'steady': 'steady.wav',
+        'paint': 'paint.wav',
+    }
+
+    T_READY = 0.5
+    T_STEADY = 2.0
+    T_PAINT = 3.5
+    T_END = 4.5
+
     def  __init__(self, gamestate, skippable=True):
         super(StartGameState, self).__init__(gamestate)
         self.skippable = skippable
@@ -121,16 +132,21 @@ class StartGameState(BannerGameState):
         self.sprite = 'ready'
 
     def update(self, dt):
+        t1 = self.t
         self.t += dt
 
-        if self.t > 3:
+        if self.t > self.T_END:
             self.game.set_gamestate(self.gamestate)
-        elif self.t > 2:
+            return
+        elif t1 < self.T_PAINT <= self.t:
             self.sprite = 'paint'
-        elif self.t > 1:
+            self.sounds['paint'].play()
+        elif t1 < self.T_STEADY <= self.t:
             self.sprite = 'steady'
-        else:
-            self.sprite = 'ready'
+            self.sounds['steady'].play()
+        elif t1 < self.T_READY <= self.t:
+            self.sounds['ready'].play()
+            sprite = 'ready'
 
     def on_key(self, event):
         if self.skippable:
@@ -149,6 +165,10 @@ class EndGameState(BannerGameState):
         'draw': sprite('gameover-draw'),
     }
 
+    SOUNDS = {
+        'whistle': 'whistle.wav',
+    }
+
     def  __init__(self, gamestate, winner):
         self.gamestate = gamestate
         self.__class__.load()
@@ -160,6 +180,8 @@ class EndGameState(BannerGameState):
             self.banners = 'loser', 'winner'
         elif winner == NO_WINNER:
             self.banners = 'draw', 'draw'
+
+        self.sounds['whistle'].play()
 
     def get_banners(self):
         return [self.sprites[s] for s in self.banners]

@@ -12,6 +12,9 @@ class Brush(Loadable):
         'brush1': 'brush1.wav',
         'brush2': 'brush2.wav',
         'brush3': 'brush3.wav',
+        'brush4': 'brush4.wav',
+        'brush5': 'brush5.wav',
+        'brush6': 'brush6.wav',
     }
 
     """A 3x3 brush to paint onto an Artwork"""
