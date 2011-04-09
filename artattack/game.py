@@ -113,8 +113,8 @@ class GameStateController(object):
         self.gs = self.gs.gamestate 
 
     def end_game(self):
-        winner = self.gs.get_winner()
-        self.gs = EndGameState(self.gs, winner)
+        winner = self.g.get_winner()
+        self.gs = EndGameState(self.g, winner)
         self.gs.on_finish.connect(self.on_gameover_finish)
 
     def update(self, dt):
@@ -238,6 +238,7 @@ class HostController(NetworkController):
         OP_PALETTE_CHANGE: 'handle_palette_change',
         OP_TOOL_MOVE: 'handle_tool_move',
         OP_PAINT: 'handle_paint',
+        OP_ENDGAME: 'handle_end_game',
     }
 
     def __init__(self, painting, timelimit=120, port=DEFAULT_PORT):
@@ -254,6 +255,16 @@ class HostController(NetworkController):
         world.red_player.on_palette_change.connect(self.on_palette_change)
         world.red_player.on_tool_move.connect(self.on_tool_move)
         world.red_player.on_paint.connect(self.on_paint)
+
+    def end_game(self):
+        # Do nothing, wait for the client to send OP_ENDGAME, which means all game
+        # packets have been received.
+        pass
+
+    def handle_end_game(self, payload):
+        super(HostController, self).end_game()
+        winner = self.g.get_winner()
+        self.net.send_message(OP_ENDGAME, winner)
 
     def on_powerup_spawn(self, powerup):
         self.net.send_message(OP_POWERUP_SPAWN, (powerup.__class__, powerup.to_net()))
@@ -297,6 +308,7 @@ class ClientController(NetworkController):
         OP_POWERUP_SPAWN: 'handle_powerup_spawn',
         OP_TOOL_MOVE: 'handle_tool_move',
         OP_PAINT: 'handle_paint',
+        OP_ENDGAME: 'handle_end_game',
     }
 
     def __init__(self, host, port=DEFAULT_PORT):
@@ -306,6 +318,13 @@ class ClientController(NetworkController):
         self.g = GameplayGameState(None, 0)
         self.gs = ConnectingGameState()
         self.net.start()
+
+    def end_game(self):
+        self.net.send_message(OP_ENDGAME, None)
+
+    def handle_end_game(self, winner):
+        self.gs = EndGameState(self.gs, winner)
+        self.gs.on_finish.connect(self.on_gameover_finish)
 
     def handle_start(self, arg):
         self.started = True
@@ -325,6 +344,7 @@ class ClientController(NetworkController):
         self.net.send_message(OP_START, None)
 
     def connect_game_signals(self):
+        self.g.on_time_over.connect(self.end_game)
         world = self.g.world
         world.blue_player.on_palette_change.connect(self.on_palette_change)
         world.blue_player.on_tool_move.connect(self.on_tool_move)

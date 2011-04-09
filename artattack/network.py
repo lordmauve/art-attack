@@ -19,6 +19,7 @@ OP_POWERUP_SPAWN = 5 # Powerup spawned
 OP_PALETTE_CHANGE = 6  # Palette changed (order/colours etc)
 OP_TOOL_MOVE = 7 # Player tool moved
 OP_PAINT = 8 # Player used a tool
+OP_ENDGAME = 9 # The game is over
 
 DEFAULT_PORT = 9067
 
