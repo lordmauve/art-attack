@@ -548,4 +548,5 @@ class ConnectingGameState(BannerGameState):
         x = w // 2 - sw // 2
         y = h // 2 - sh // 2
 
+        screen.fill((255, 255, 255))
         banner.draw(screen, (x, y))

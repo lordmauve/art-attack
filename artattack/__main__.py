@@ -81,12 +81,12 @@ def main(painting=DEFAULT_PAINTING, timelimit=120):
     pygame.quit()
 
 
-def host(port=None):
+def host(painting=DEFAULT_PAINTING, timelimit=120, port=None):
     game = Game()
     kwargs = {}
     if port is not None:
         kwargs['port'] = port
-    game.set_gamestate(GameMenu(controller=HostController))
+    game.set_gamestate(HostController(painting, timelimit=timelimit, port=port))
     game.run()
     pygame.quit()
 

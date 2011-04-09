@@ -22,7 +22,10 @@ if __name__ == "__main__":
         if not mo:
             parser.error("Invalid format for --connect argument. Should be in host[:port] format.")
         host = mo.group(1)
-        port = int(mo.group(3))
+        if mo.group(3):
+            port = int(mo.group(3))
+        else:
+            port = DEFAULT_PORT
         artattack.__main__.connect(host, port)
     else:
         artattack.__main__.menu()
