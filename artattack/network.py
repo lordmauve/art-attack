@@ -34,7 +34,6 @@ class BaseConnection(Thread):
 
     def send_message(self, op, payload):
         buf = dumps((op, payload), -1)
-        print op, '-> len', len(buf)
         self.send_queue.put(buf)
 
     def receive_message(self):
