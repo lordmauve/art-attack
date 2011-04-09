@@ -49,7 +49,8 @@ class PlayerCharacter(Actor):
     ATTACK_DURATION = 0.4 #seconds, how long an attack lasts
     ATTACK_INTERVAL = 0.3 #seconds, how long between attacks
 
-    HIT_TIME = 0.5 #seconds, how long you are stunned when hit
+    HIT_TIME = 1.5 #seconds, how long you are stunned when hit
+    MAX_STUN_TIME = 5 # seconds, how long your stun can build up
 
     def __init__(self, pos, player):
         self.player = player
@@ -59,7 +60,7 @@ class PlayerCharacter(Actor):
         self.painting = 0
         self.dir = 'right'
         self.attacking = 0
-        self.hit_time = 0
+        self.stun = 0
         self.sprite = None
         self.play(self.DEFAULT_SPRITE)
 
@@ -86,8 +87,18 @@ class PlayerCharacter(Actor):
 
         if self.attacking > 0:
             self.attacking -= dt
-        if self.hit_time > 0:
-            self.hit_time -= dt
+        if self.stun > 0:
+            self.stun -= dt
+
+        if not self.can_act():
+            if self.stun > 0:
+                v = self.target_pos - self.pos
+                if v.length2 > 0.00001:
+                    self.pos += v.scaled_to(min(v.length, 8))
+                self.play('hit')
+            elif self.attacking > self.ATTACK_INTERVAL:
+                self.play('standing-attack')
+            return
     
         bx, by = self.brush_offsets[self.dir]
         t = self.tool.pos.floor_pos() - Vector([bx, by * FORESHORTENING])
@@ -119,7 +130,7 @@ class PlayerCharacter(Actor):
         if self.painting > 0:
             self.painting -= dt
 
-        if self.hit_time > 0:
+        if self.stun > 0:
             sprite = 'hit'
         elif self.attacking > self.ATTACK_INTERVAL:
             sprite = 'standing-attack'
@@ -140,7 +151,7 @@ class PlayerCharacter(Actor):
         return tl, br
 
     def attack(self):
-        if self.attacking > 0 or self.hit_time > 0:
+        if self.attacking > 0 or self.stun > 0:
             return
         self.sounds['swish'].play()
         self.attacking = self.ATTACK_INTERVAL + self.ATTACK_DURATION
@@ -153,11 +164,20 @@ class PlayerCharacter(Actor):
 
     def hit(self, attack_vector):
         self.sounds['hit'].play()
-        self.hit_time = self.HIT_TIME
-        self.pos += attack_vector
+        if self.stun <= 0:
+            self.target_pos = self.pos
+        self.target_pos += attack_vector * 0.6
+        self.stun = min(self.stun + self.HIT_TIME, self.MAX_STUN_TIME)
         if self.tool:
             x, y = attack_vector
-            self.tool.pos += (x // 30, 0)
+            self.tool.pos += (x // 20, 0)
+
+    def can_act(self):
+        """Are the conditions right for the player to paint or attack?"""
+        return (
+            self.attacking <= 0 and 
+            self.stun <= 0
+        )
 
     def paint(self):
         self.painting = 0.3
@@ -372,7 +392,7 @@ class Player(object):
         self.pixels_label.draw(screen, pixels)
 
     def paint(self):
-        if self.tool:
+        if self.tool and self.pc.can_act():
             colour = self.palette.get_selected().index
             self.tool.paint(colour, sound=not self.pc.is_painting())
             self.pc.paint()
@@ -404,9 +424,10 @@ class Player(object):
             self.tool.pos = pos
 
     def attack(self):
-        self.pc.attack()
-        region = self.pc.get_hit_region()
-        self.on_attack.fire(self.pc, region)
+        if self.pc.can_act():
+            self.pc.attack()
+            region = self.pc.get_hit_region()
+            self.on_attack.fire(self.pc, region)
 
     def next_colour(self):
         self.palette.next()
