@@ -152,11 +152,6 @@ class TwoPlayerController(GameStateController):
         self.gs.on_key(event)
 
         if hasattr(self.gs, 'world'):
-            if event.key == K_F10:
-                self.gs.world.give_all_colours()
-            if event.key == K_F9:
-                self.gs.world.drop_powerups()
-
             for k in self.keycontrollers:
                 k.on_key_down(event)
 
