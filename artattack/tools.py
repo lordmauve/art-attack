@@ -7,6 +7,7 @@ from pygame.color import Color
 
 from .animation import Loadable
 
+
 class Brush(Loadable):
     SOUNDS = {
         'brush1': 'brush1.wav',
@@ -64,13 +65,17 @@ class Brush(Loadable):
         self.pos += (0, 1)
 
     def paint(self, colour):
-        left, top = self.topleft()
-        right, bottom = self.bottomright()
+        tl = self.topleft()
+        br = self.bottomright()
+        left, top = tl 
+        right, bottom = br
         artwork = self.pos.get_artwork()
         for j in range(top, bottom + 1):
             for i in range(left, right + 1):
                 artwork.paint_pixel((i, j), colour)
+        self.play_sound()
 
+    def play_sound(self):
         sound = random.choice(self.sounds.values())
         sound.play()
 

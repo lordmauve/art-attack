@@ -377,7 +377,7 @@ class Player(object):
             self.tool.paint(colour)
             self.pc.paint()
             self.palette.switch()
-            self.on_paint.fire(self, self.tool)
+            self.on_paint.fire(self, self.tool, colour)
 
     def up(self):
         if self.tool:

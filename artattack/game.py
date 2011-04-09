@@ -206,6 +206,26 @@ class NetworkController(GameStateController):
         self.set_status(errorstr)
         self.started = False
 
+    def on_paint(self, player, tool, colour):
+        msg = (
+            player.ID,
+            tool.__class__,
+            tool.pos.to_net(),
+            colour
+        )
+        self.net.send_message(OP_PAINT, msg)
+
+    def handle_paint(self, player_tool):
+        playerid, tool_class, pos, colour = player_tool
+        world = self.g.world
+        pos = ArtworkPosition.from_net(pos, world)
+        tool = tool_class(world, pos)
+        tool.paint(colour)
+
+        #TODO: server should sync back the pixels under the tool
+        # to eliminate race conditions with one player overpainting the other
+        
+
 
 class HostController(NetworkController):
     # A mapping of operation to handler
@@ -215,6 +235,7 @@ class HostController(NetworkController):
         OP_START: 'send_start',
         OP_PALETTE_CHANGE: 'handle_palette_change',
         OP_TOOL_MOVE: 'handle_tool_move',
+        OP_PAINT: 'handle_paint',
     }
 
     def __init__(self, painting, timelimit=120, port=DEFAULT_PORT):
@@ -230,6 +251,7 @@ class HostController(NetworkController):
         world.on_powerup_spawn.connect(self.on_powerup_spawn)
         world.red_player.on_palette_change.connect(self.on_palette_change)
         world.red_player.on_tool_move.connect(self.on_tool_move)
+        world.red_player.on_paint.connect(self.on_paint)
 
     def on_powerup_spawn(self, powerup):
         self.net.send_message(OP_POWERUP_SPAWN, (powerup.__class__, powerup.to_net()))
@@ -272,6 +294,7 @@ class ClientController(NetworkController):
         OP_PALETTE_CHANGE: 'handle_palette_change',
         OP_POWERUP_SPAWN: 'handle_powerup_spawn',
         OP_TOOL_MOVE: 'handle_tool_move',
+        OP_PAINT: 'handle_paint',
     }
 
     def __init__(self, host, port=DEFAULT_PORT):
@@ -303,6 +326,7 @@ class ClientController(NetworkController):
         world = self.g.world
         world.blue_player.on_palette_change.connect(self.on_palette_change)
         world.blue_player.on_tool_move.connect(self.on_tool_move)
+        world.blue_player.on_paint.connect(self.on_paint)
 
     def handle_powerup_spawn(self, powerup):
         world = self.g.world
