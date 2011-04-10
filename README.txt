@@ -7,21 +7,24 @@ Team: Team Wasabi
 Members: Daniel Pope, Glenn Jones
 License: see LICENSE.txt
 
-
 Running the Game
 ----------------
 
-On Windows or Mac OS X, locate the "run_game.pyw" file and double-click it.
+On Windows or Mac OS X, locate the "run_game.py" file and double-click it.
 
 Othewise open a terminal / console and "cd" to the game directory and run:
 
   python run_game.py
 
-
 How to Play the Game
 --------------------
 
-Try to paint the picture using your clumsy brush - Nine Times the size you might like.
+Try to paint the picture using your clumsy brush - Nine Times the size you might
+like.
+
+The key bindings are in artattack/keybindings.py in a relatively straightforward
+format. You may need to change them - refer to the Pygame Docs
+(http://pygame.org/docs/ref/key.html) to see what key constants you can use.
 
 Main controls - 
 
@@ -37,10 +40,23 @@ F - Paint
 G - Cycle colour
 R - Attack
 
-Note that cycling colour uses an MRU system so you can toggle backwards and forwards.
+Cycling colour uses an MRU system so you can toggle backwards and forwards.
 
-The key bindings are in artattack/keybindings.py.
+Network Play
+------------
 
+The default server port is 9067. You may need to open a port in your firewall to host a game. There is a command line options for starting a server on a different port (but the option for changing the painting was taken out when I implemented the menu, stupidly).
+
+More usefully, you can connect to a server from the commandline:
+
+python run_game.py -c hostname-or-ip[:port]
+
+A good place to set up games is the official #pyweek channel on Freenode.
+ 
+Original Pictures
+-----------------
+
+You can use any picture with an indexed palette, not just the pre-supplied ones. Just drop it into data/paintings/. Images with a 3:2 ratio whose dimensions are factors of 320 and 240, with ~4-8 colours work best (players can only hold 6 colours). In network games, the client doesn't need a copy of the image, because it is transferred from the host before the game starts.
 
 Development notes 
 -----------------
@@ -63,3 +79,14 @@ Upload to the Python Package Index with::
    python setup.py register
    python setup.py sdist upload
 
+
+Credits
+-------
+
+Concept - Daniel Pope
+Programming - Daniel Pope
+Occasional Programmer - Glenn Jones
+Graphics - Daniel Pope
+Sound - Daniel Pope
+
+With thanks to Jonathan Hartley, Ciarán Mooney and René Dudfield.
