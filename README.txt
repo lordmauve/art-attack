@@ -4,7 +4,7 @@ Art Attack
 Entry in PyWeek #12  <http://www.pyweek.org/12/>
 URL: http://pyweek.org/e/TeamWasabi
 Team: Team Wasabi
-Members: Daniel Pope, Glenn Jones
+Members: Daniel Pope <mauve@mauvesoft.co.uk>, Glenn Jones <glenn@millenniumhand.co.uk>
 License: see LICENSE.txt
 
 Running the Game
@@ -58,6 +58,22 @@ Original Pictures
 
 You can use any picture with an indexed palette, not just the pre-supplied ones. Just drop it into data/paintings/. Images with a 3:2 ratio whose dimensions are factors of 320 and 240, with ~4-8 colours work best (players can only hold 6 colours). In network games, the client doesn't need a copy of the image, because it is transferred from the host before the game starts.
 
+Credits
+-------
+
+Concept - Daniel Pope
+Programming - Daniel Pope
+Occasional Programmer - Glenn Jones
+Graphics - Daniel Pope
+Sound - Daniel Pope
+
+With thanks to Jonathan Hartley, Ciarán Mooney and René Dudfield.
+
+Support
+-------
+
+If you have any issues running this game during the PyWeek 12 judging period I will be happy to help. Drop me an e-mail at mauve@mauvesoft.co.uk and I'll do my best to resolve your problem.
+
 Development notes 
 -----------------
 
@@ -80,13 +96,3 @@ Upload to the Python Package Index with::
    python setup.py sdist upload
 
 
-Credits
--------
-
-Concept - Daniel Pope
-Programming - Daniel Pope
-Occasional Programmer - Glenn Jones
-Graphics - Daniel Pope
-Sound - Daniel Pope
-
-With thanks to Jonathan Hartley, Ciarán Mooney and René Dudfield.
