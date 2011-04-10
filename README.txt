@@ -1,10 +1,10 @@
-Your Game Title
-===============
+Art Attack
+==========
 
 Entry in PyWeek #12  <http://www.pyweek.org/12/>
-URL: http://pyweek.org/e/wasabi
-Team: YOUR TEAM NAME (leave the "Team: bit")
-Members: YOUR TEAM MEMBERS (leave the "Members: bit")
+URL: http://pyweek.org/e/TeamWasabi
+Team: Team Wasabi
+Members: Daniel Pope, Glenn Jones
 License: see LICENSE.txt
 
 
@@ -21,11 +21,25 @@ Othewise open a terminal / console and "cd" to the game directory and run:
 How to Play the Game
 --------------------
 
+Try to paint the picture using your clumsy brush - Nine Times the size you might like.
 
+Main controls - 
 
-Move the cursor around the screen with the mouse.
+UP, DOWN, LEFT, RIGHT - Movement
+INS - Paint
+DEL - Cycle colour
+END - Attack
 
-Press the left mouse button to fire the ducks.
+Alt Controls (red in split-screen)
+
+W, A, S, D - Movement
+F - Paint
+G - Cycle colour
+R - Attack
+
+Note that cycling colour uses an MRU system so you can toggle backwards and forwards.
+
+The key bindings are in artattack/keybindings.py.
 
 
 Development notes 
