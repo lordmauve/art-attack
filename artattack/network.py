@@ -101,22 +101,24 @@ class BaseConnection(Thread):
             self.receive_queue.put((OP_ERR, e.strerror))
             return
 
-        while self.keeprunning:
-            if self.send_queue.qsize():
-                wlist = [self.socket]
-            else:
-                wlist = []
-            rlist, wlist, xlist = select([self.socket], wlist, [self.socket], 0.02)
+        try:
+            while self.keeprunning:
+                if self.send_queue.qsize():
+                    wlist = [self.socket]
+                else:
+                    wlist = []
+                rlist, wlist, xlist = select([self.socket], wlist, [self.socket], 0.02)
 
-            try:
-                if rlist:
-                    self._read_socket()
-                elif wlist:
-                    self._write_socket()
-            except:
-                self.receive_queue.put((OP_ERR, "Networking crashed :("))
-                break
-        self.close()
+                try:
+                    if rlist:
+                        self._read_socket()
+                    elif wlist:
+                        self._write_socket()
+                except:
+                    self.receive_queue.put((OP_ERR, "Networking crashed :("))
+                    break
+        finally:
+            self.close()
 
     def __del__(self):
         self.close()
@@ -166,6 +168,10 @@ class ServerSocket(BaseConnection):
             time.sleep(1)
         if self.socket:
             self.on_connection_receive()
+
+    def close(self):
+        super(ServerSocket, self).close()
+        self.server_socket.close()
 
 
 class ClientSocket(BaseConnection):
