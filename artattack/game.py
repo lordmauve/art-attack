@@ -259,8 +259,9 @@ class NetworkController(GameStateController):
         pc.attack()
 
     def on_key(self, event):
-        for k in self.keycontrollers:
-            k.on_key_down(event)
+        if self.started:
+            for k in self.keycontrollers:
+                k.on_key_down(event)
         
 
 
