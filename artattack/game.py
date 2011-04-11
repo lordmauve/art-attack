@@ -103,7 +103,7 @@ class GameStateController(object):
 
         world.on_pc_hit.connect(self.handle_pc_hit)
 
-        self.keycontrollers = self.get_controllers(world.red_player, world.blue_player)
+        self.keycontrollers = []
 
         self.start_game()
 
@@ -120,6 +120,7 @@ class GameStateController(object):
 
     def on_countdown_finish(self):
         self.gs = self.gs.gamestate 
+        self.keycontrollers = self.get_controllers(self.g.world.red_player, self.g.world.blue_player)
 
     def end_game(self):
         winner = self.g.get_winner()
@@ -152,9 +153,8 @@ class TwoPlayerController(GameStateController):
 
         self.gs.on_key(event)
 
-        if hasattr(self.gs, 'world'):
-            for k in self.keycontrollers:
-                k.on_key_down(event)
+        for k in self.keycontrollers:
+            k.on_key_down(event)
 
 
 from .network import *

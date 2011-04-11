@@ -180,7 +180,7 @@
      inkscape:pageshadow="2"
      inkscape:zoom="1"
      inkscape:cx="205.36754"
-     inkscape:cy="-379.3479"
+     inkscape:cy="-179.3479"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -1667,7 +1667,10 @@
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90" />
     <g
-       id="g4240">
+       id="g4240"
+       inkscape:export-filename="/home/mauve/dev/pyweek-wasabi/data/sprites/join-menu.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
       <g
          id="g3398"
          transform="translate(7,1059)"
