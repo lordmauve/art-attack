@@ -46,8 +46,8 @@ class PlayerCharacter(Actor):
 
     MAX_SPEED = 500
 
-    ATTACK_DURATION = 0.4 #seconds, how long an attack lasts
-    ATTACK_INTERVAL = 0.3 #seconds, how long between attacks
+    ATTACK_DURATION = 0.3 #seconds, how long the animation is shown
+    ATTACK_INTERVAL = 0.2 #seconds, how long after the animation finishes the player can attack once more
 
     HIT_TIME = 1.5 #seconds, how long you are stunned when hit
     HIT_TIME_OWN_HALF = 1 #seconds, how long you are stunned when hit
