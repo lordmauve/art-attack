@@ -195,6 +195,14 @@ class NetworkController(GameStateController):
             getattr(self, handler)(payload)
 
     # Common handlers
+    def handle_version_mismatch(self, message):
+        """Handle a mismatch of versions of the game between players.
+
+        The netcode automatically stops itself in this case; all we need to do
+        is inform the player.
+        
+        """
+        self.set_status(message)
 
     def on_tool_move(self, player, pos):
         self.net.send_message(OP_TOOL_MOVE, (player.ID, pos.to_net()))
@@ -268,6 +276,7 @@ class NetworkController(GameStateController):
 class HostController(NetworkController):
     # A mapping of operation to handler
     HANDLERS = {
+        OP_VERSION_MISMATCH: 'handle_version_mismatch',
         OP_ERR: 'handle_network_error',
         OP_CONNECT: 'on_connect',
         OP_START: 'send_start',
@@ -340,6 +349,7 @@ class ClientController(NetworkController):
     HANDLERS = {
         OP_GAMECONFIG: 'configure_game',
         OP_ERR: 'handle_network_error',
+        OP_VERSION_MISMATCH: 'handle_version_mismatch',
         OP_START: 'handle_start',
         OP_PALETTE_CHANGE: 'handle_palette_change',
         OP_POWERUP_SPAWN: 'handle_powerup_spawn',

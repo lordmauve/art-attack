@@ -8,7 +8,9 @@ from Queue import Queue, Empty
 
 from select import select
 
+from artattack import VERSION, REVISION, VERSION_STRING
 
+OP_VERSION_MISMATCH = -3 # Versions didn't match
 OP_DISCONNECT = -2 # Disconnect
 OP_ERR = -1 # Socket error
 OP_CONNECT = 0  # Connection established
@@ -23,7 +25,7 @@ OP_PAINT = 8 # Player used a tool
 OP_ENDGAME = 9 # The game is over
 OP_ATTACK = 10 # A player is attacking
 OP_HIT = 11 # A player has been hit
-
+OP_VERSION = 12  # The version of the game
 
 DEFAULT_PORT = 9067
 
@@ -73,7 +75,38 @@ class BaseConnection(Thread):
     
     def _recv_chunk(self, chunk):
         payload = loads(chunk)
+        self.handle_chunk(payload)
+
+    def handle_chunk_initial(self, payload):
+        if not self.keeprunning:
+            # Skip any chunks received while we are waiting to shutdown
+            return
+
+        # Check versions
+        op, v = payload
+        if op != OP_VERSION:
+            self.keeprunning = False
+            self.receive_queue.put((OP_VERSION_MISMATCH, "Remote player has an outdated version."))
+            return
+
+        version, revision = v
+        if revision != REVISION or version != VERSION:
+            c = cmp(version, VERSION)
+            messages = [
+                "Remote player has a different revision.",
+                "Remote player has an older version, %(version)s.",
+                "Remote player has a newer version, %(version)s.",
+            ]
+            self.receive_queue.put((OP_VERSION_MISMATCH, messages[c] % {'version': VERSION_STRING}))
+            self.keeprunning = False
+            return
+        
+        self.handle_chunk = self.handle_chunk_main
+
+    def handle_chunk_main(self, payload):
         self.receive_queue.put(payload)
+
+    handle_chunk = handle_chunk_initial
 
     def _write_socket(self):
         try:
@@ -94,12 +127,17 @@ class BaseConnection(Thread):
         """
         raise NotImplementedError("Implement this")
 
+    def send_version(self):
+        self.send_message(OP_VERSION, (VERSION, REVISION))
+
     def run(self):
         try:
             self.establish_connection()
         except socket.error, e:
             self.receive_queue.put((OP_ERR, e.strerror))
             return
+
+        self.send_version()
 
         try:
             while self.keeprunning:
@@ -110,11 +148,13 @@ class BaseConnection(Thread):
                 rlist, wlist, xlist = select([self.socket], wlist, [self.socket], 0.02)
 
                 try:
+                    if wlist:
+                        self._write_socket()
                     if rlist:
                         self._read_socket()
-                    elif wlist:
-                        self._write_socket()
                 except:
+                    import traceback
+                    traceback.print_exc()
                     self.receive_queue.put((OP_ERR, "Networking crashed :("))
                     break
         finally:
@@ -140,7 +180,11 @@ class ServerSocket(BaseConnection):
         super(ServerSocket, self).__init__()
         self.port = port
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server_socket.bind(('0.0.0.0', port))
+        self.server_socket.setsockopt(socket.IPPROTO_IP, socket.SO_REUSEADDR, 1)
+        try:
+            self.server_socket.bind(('0.0.0.0', port))
+        except socket.error, e:
+            self.receive_queue.put((OP_ERR, "Cannot start server: " + e.strerror))
         self.server_socket.listen(1)
         self.server_socket.setblocking(0)
         self.socket = None
@@ -165,7 +209,7 @@ class ServerSocket(BaseConnection):
         while self.keeprunning:
             if self.wait_for_connection():
                 break
-            time.sleep(1)
+            time.sleep(0.2)
         if self.socket:
             self.on_connection_receive()
 
