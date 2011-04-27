@@ -1,7 +1,13 @@
+Changes from 1.0.0
+------------------
 
-Changes
-=======
-
-
-
-
+* New: increase the rate players can attack
+* New: check for consistent versions across netcode
+* New: better report certain network errors
+* New: synchronise actor positions over the network
+* New: send periodic keepalives / detect interrupted connection
+* Fix: crash on connect when host moves cursor before client has initiated its session
+* Fix: don't set up KeyControllers until the countdown finishes
+* Fix: close the server socket on disconnection
+* Fix: prevent players moving brush while stunned
+* Fix: stun times are synchronised over the network

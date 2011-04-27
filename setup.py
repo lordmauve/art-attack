@@ -9,22 +9,23 @@ import os
 #
 # the goods are placed in the dist dir for you to .zip up or whatever...
 
+from artattack import VERSION_STRING
 
-APP_NAME = 'wasabi'
+
+APP_NAME = 'artattack'
 DESCRIPTION = open('README.txt').read()
 CHANGES = open('CHANGES.txt').read()
-TODO = open('TODO.txt').read()
 
 
 
 METADATA = {
     'name':APP_NAME,
-    'version':          '0.0.1',
+    'version':          VERSION_STRING,
     'license':          'short_licence',
     'description':      '',
     'author':           '',
     #'author_email':     '',
-    'url':              'http://pyweek.org/e/wasabi',
+    'url':              'http://pyweek.org/e/TeamWasabi',
     'classifiers':      [
             'Development Status :: 4 - Beta',
             'Intended Audience :: End Users/Desktop',
@@ -32,15 +33,10 @@ METADATA = {
             'License :: OSI Approved :: BSD License',
             'Operating System :: OS Independent',
             'Programming Language :: Python :: 2',
-            'Programming Language :: Python :: 2.5',
             'Programming Language :: Python :: 2.6',
             'Programming Language :: Python :: 2.7',
-            'Programming Language :: Python :: 3',
-            'Programming Language :: Python :: 3.0',
-            'Programming Language :: Python :: 3.1',
-            'Programming Language :: Python :: 3.2',
             'Topic :: Software Development :: Libraries :: pygame',
-            'Topic :: Games/Entertainment :: Real Time Strategy',
+            'Topic :: Games/Entertainment',
     ],
 
 

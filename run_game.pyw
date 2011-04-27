@@ -1,3 +1,3 @@
-import yourgameshortname.main
+import artattack.__main__
 if __name__ == "__main__":
-    yourgameshortname.main.main()
+    artattack.__main__.menu()
