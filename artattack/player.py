@@ -192,6 +192,9 @@ class PlayerCharacter(Actor):
     def is_painting(self):
         return self.painting > 0
 
+    def is_stunned(self):
+        return self.stun > 0
+
     def alter_v_for_collision(self, v):
         if (self.pos + v).distance_to(self.other_player.pos) > 20:
             return v
@@ -413,22 +416,22 @@ class Player(object):
             self.on_paint.fire(self, self.tool, colour)
 
     def up(self):
-        if self.tool:
+        if self.tool and not self.pc.is_stunned():
             self.tool.move_up()
             self.on_tool_move.fire(self, self.tool.pos)
 
     def down(self):
-        if self.tool:
+        if self.tool and not self.pc.is_stunned():
             self.tool.move_down()
             self.on_tool_move.fire(self, self.tool.pos)
 
     def left(self):
-        if self.tool:
+        if self.tool and not self.pc.is_stunned():
             self.tool.move_left()
             self.on_tool_move.fire(self, self.tool.pos)
 
     def right(self):
-        if self.tool:
+        if self.tool and not self.pc.is_stunned():
             self.tool.move_right()
             self.on_tool_move.fire(self, self.tool.pos)
         

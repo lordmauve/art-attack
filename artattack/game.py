@@ -311,7 +311,7 @@ class HostController(NetworkController):
 
     def handle_pc_hit(self, pc, attack_vector):
         pc.hit(attack_vector)
-        self.net.send_message(OP_HIT, (pc.id, attack_vector))
+        self.net.send_message(OP_HIT, (pc.id, attack_vector, pc.stun))
 
     def end_game(self):
         # Do nothing, wait for the client to send OP_ENDGAME, which means all game
@@ -415,9 +415,12 @@ class ClientController(NetworkController):
         world.spawn_powerup(inst, id=id)
 
     def handle_hit(self, hit):
-        actor_id, vector = hit
+        """Handle a message from the server saying a PC has been hit."""
+        actor_id, vector, stun = hit
         world = self.g.world
-        world.players[actor_id].pc.hit(vector)
+        pc = world.players[actor_id].pc
+        pc.hit(vector)
+        pc.stun = stun
     
     def on_time_out(self):
         # Wait for the server to end the game
