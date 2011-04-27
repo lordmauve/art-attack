@@ -72,7 +72,8 @@ class BaseConnection(Thread):
                 break
             chunk = self.read_buf[4:size + 4]
             self.read_buf = self.read_buf[size + 4:]
-            self._recv_chunk(chunk)
+            if chunk:
+                self._recv_chunk(chunk)
     
     def _recv_chunk(self, chunk):
         payload = loads(chunk)
@@ -121,6 +122,9 @@ class BaseConnection(Thread):
 
         self.socket.send(size + buf)
 
+    def send_keepalive_packet(self):
+        self.send_queue.put('')
+
     def establish_connection(self):
         """Subclasses should implement this method to block until a connection is successfully established
         or self.keeprunning is False
@@ -140,19 +144,32 @@ class BaseConnection(Thread):
 
         self.send_version()
 
+        t = 0
+        last_rx = 0
+        last_tx = 0
         try:
             while self.keeprunning:
                 if self.send_queue.qsize():
+                    wlist = [self.socket]
+                elif t - last_tx > 50:
+                    self.send_keepalive_packet()
                     wlist = [self.socket]
                 else:
                     wlist = []
                 rlist, wlist, xlist = select([self.socket], wlist, [self.socket], 0.02)
 
+                if not (rlist or wlist or xlist):
+                    t += 1
+                    if t - last_rx == 300:
+                        self.receive_queue.put((OP_ERR, 'Connection interruped.'))
+
                 try:
                     if wlist:
                         self._write_socket()
+                        last_tx = t
                     if rlist:
                         self._read_socket()
+                        last_rx = t
                 except:
                     import traceback
                     traceback.print_exc()
