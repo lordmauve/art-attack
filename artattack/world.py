@@ -219,6 +219,13 @@ class World(object):
         self.on_powerup_spawn = Signal()
         self.on_pc_hit = Signal()
 
+    def get_actor_for_id(self, id):
+        # FIXME: use a lookup table for this
+        for a in self.actors:
+            if a.id == id:
+                return a
+        raise ValueError("No actor with id %r" % id)
+
     def spawn(self, actor, id=None):
         if id is not None:
             actor.id = id

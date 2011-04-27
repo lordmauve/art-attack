@@ -163,6 +163,11 @@ class NetworkController(GameStateController):
     status = ''
     started = False
 
+    # Periodic synchronisation (while game is running)
+    TICK_INTERVAL = 0.5  # how often to tick
+    tick_timer = 0 # how long till next tick
+    ticks = 0 # how many ticks 
+
     def draw(self, screen):
         if self.gs:
             self.gs.draw(screen)
@@ -177,6 +182,15 @@ class NetworkController(GameStateController):
             for k in self.keycontrollers:
                 k.update(dt)
             self.gs.update(dt)
+
+            self.tick_timer += dt
+            if self.tick_timer > self.TICK_INTERVAL:
+                self.ticks += 1
+                self.tick()
+                self.tick_timer = 0
+
+    def tick(self):
+        """Subclasses can use this to send periodical updates."""
 
     def process_request(self):
         while True:
@@ -270,7 +284,20 @@ class NetworkController(GameStateController):
         if self.started:
             for k in self.keycontrollers:
                 k.on_key_down(event)
-        
+
+    def send_position(self, actors):
+        """Send the positions of a list of actors over the network."""
+        pos = []
+        for a in actors:
+            pos.append((a.id, a.pos))
+        self.net.send_message(OP_POS, pos)
+
+    def handle_position(self, actors):
+        """Handle the update of a list of actor positions."""
+        world = self.g.world
+        for id, pos in actors:
+            a = world.get_actor_for_id(id)
+            a.pos = pos
 
 
 class HostController(NetworkController):
@@ -285,6 +312,7 @@ class HostController(NetworkController):
         OP_PAINT: 'handle_paint',
         OP_ENDGAME: 'handle_end_game',
         OP_ATTACK: 'handle_attack',
+        OP_POS: 'handle_position',
     }
 
     def __init__(self, painting, timelimit=120, port=DEFAULT_PORT):
@@ -344,6 +372,11 @@ class HostController(NetworkController):
         world = self.g.world
         self.net.send_message(OP_START, None)
 
+    def tick(self):
+        """Sync game state to the client"""
+        world = self.g.world
+        self.send_position([a for a in world.actors if a is not world.blue_player.pc])
+
 
 class ClientController(NetworkController):
     HANDLERS = {
@@ -358,6 +391,7 @@ class ClientController(NetworkController):
         OP_ENDGAME: 'handle_end_game',
         OP_ATTACK: 'handle_attack',
         OP_HIT: 'handle_hit',
+        OP_POS: 'handle_position',
     }
 
     def __init__(self, host, port=DEFAULT_PORT):
@@ -425,6 +459,11 @@ class ClientController(NetworkController):
     def on_time_out(self):
         # Wait for the server to end the game
         pass
+
+    def tick(self):
+        """Sync the position of the blue player."""
+        world = self.g.world
+        self.send_position([world.blue_player.pc])
 
 
 class BannerGameState(Loadable):

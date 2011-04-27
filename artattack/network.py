@@ -26,6 +26,7 @@ OP_ENDGAME = 9 # The game is over
 OP_ATTACK = 10 # A player is attacking
 OP_HIT = 11 # A player has been hit
 OP_VERSION = 12  # The version of the game
+OP_POS = 13  # Sync position of an actor or actors
 
 DEFAULT_PORT = 9067
 
