@@ -1,5 +1,5 @@
 # Version number - this allows users to see who has the more out-of-date version
-VERSION = (1, 0, 2)
+VERSION = (1, 0, 3)
 
 # An automatically substituted revision ID; this ensures users are on identical revisions
 REVISION = '$Revision$'
